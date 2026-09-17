@@ -4,23 +4,25 @@
 -- top of that the script opens it from a distance while a guard stands at a
 -- Laser Door Panel within reach or a Door Servo on the door is triggered.
 --
--- The engine slides a door's sprite along the wall as its openness rises,
--- so the script never lets the door sit part-way: the tick the engine starts
--- opening it, the script snaps it fully open, and the tick it starts closing,
--- fully shut. Sprites 0 to 2 are the sealed door with its beams pulsing.
--- Sprites 3 and 4 hold the beamless frame drawn one slide to the left or
--- right; the engine's offset carries it back into the doorway, so an open
--- door looks like the beams simply switched off. A door standing in a
--- north-south wall uses sprites 6 and 7 instead, shifted down or up. Sprite
--- 5 is empty: it is shown on any tick that still reports the door part-way
--- open, and for a short settle time after each change of state, which
--- covers the renderer catching up with a change made within one update.
--- A broken door is drawn slid too, by the same distance, but always the way
--- its OpenDir points: up a north-south wall, which is the opposite way from
--- that door standing open, and left along an east-west wall, which is the
--- same way. So a broken door in a north-south wall shows sprite 6, and one
--- in an east-west wall shows its ordinary open frame. Sprite 8, the frame
--- drawn at rest, lands a full slide outside the doorway and is never shown.
+-- The engine draws a door at its position plus OpenDir times its openness,
+-- which is how its own doors slide into the wall. A laser door's frame must
+-- not move, so the script holds OpenDir at zero and the sprite stays in the
+-- doorway whatever the door is doing. Sprites 0 to 2 are the sealed door with
+-- its beams pulsing, and sprite 8 is the same frame with its beams off, shown
+-- while the door is open or broken.
+--
+-- The script still never lets the door sit part-way: the tick the engine
+-- starts opening it, the script snaps it fully open, and the tick it starts
+-- closing, fully shut, so the beams cut out and come back at once.
+--
+-- If OpenDir cannot be held at zero the script falls back to the pre-shifted
+-- frames. Sprites 3 and 4 hold the beamless frame one slide to the left or
+-- right and sprites 6 and 7 one slide down or up; the script shows the one
+-- drawn opposite the slide, so the engine's offset carries it back into the
+-- doorway. OpenDir is the door's facing turned a quarter turn, times its
+-- width, so which one that is depends on how the door was rotated. Sprite 5
+-- is empty: it covers the ticks where the door is part-way and the settle
+-- time after each change of state, while the renderer catches up.
 
 local SCAN_INTERVAL = 0.2
 local PANEL_REACH = 3.5
@@ -33,6 +35,7 @@ local OPEN_FRAME_RIGHT = 4
 local TRANSITION_FRAME = 5
 local OPEN_FRAME_DOWN = 6
 local OPEN_FRAME_UP = 7
+local REST_FRAME = 8
 -- The engine treats an object as broken from this much damage.
 local BROKEN_AT = 0.7
 local SHUT = 0.02
@@ -95,19 +98,55 @@ local function guardAtPanel()
     return false
 end
 
-local function openFrame()
-    -- The engine slides the sprite in the door's open direction; the frame
-    -- drawn on the opposite side lands in the doorway. A door standing in a
-    -- north-south wall (facing east or west) has its own pair of frames.
-    local dir = tonumber(this.OpenDir) or 0
-    local vertical = this.Or ~= nil and (tonumber(this.Or.x) or 0) ~= 0
-    if vertical then
-        if dir > 0 then
-            return OPEN_FRAME_DOWN
+local function holdStill()
+    -- True once the engine has no slide left to apply to this door.
+    local dir = this.OpenDir
+    if dir == nil then
+        return false
+    end
+    local x, y = tonumber(dir.x), tonumber(dir.y)
+    if x == nil or y == nil then
+        return false
+    end
+    if x ~= 0 then
+        dir.x = 0
+    end
+    if y ~= 0 then
+        dir.y = 0
+    end
+    return tonumber(dir.x) == 0 and tonumber(dir.y) == 0
+end
+
+local function slideDirection()
+    local dir = this.OpenDir
+    if dir ~= nil then
+        local x, y = tonumber(dir.x), tonumber(dir.y)
+        if x ~= nil and y ~= nil then
+            return x, y
         end
+    end
+    -- The engine's own sum: the facing turned a quarter turn. A door that
+    -- was never rotated faces south.
+    local facingX, facingY = 0, 1
+    if this.Or ~= nil then
+        facingX = tonumber(this.Or.x) or 0
+        facingY = tonumber(this.Or.y) or 0
+    end
+    return -facingY, facingX
+end
+
+local function openFrame()
+    -- Only reached when the slide could not be switched off: the frame drawn
+    -- on the side the door slides away from is the one that lands in the
+    -- doorway.
+    local x, y = slideDirection()
+    if y < 0 then
+        return OPEN_FRAME_DOWN
+    end
+    if y > 0 then
         return OPEN_FRAME_UP
     end
-    if dir > 0 then
+    if x > 0 then
         return OPEN_FRAME_LEFT
     end
     return OPEN_FRAME_RIGHT
@@ -123,17 +162,17 @@ local function isBroken()
     return (tonumber(this.Damage) or 0) >= BROKEN_AT
 end
 
-local function brokenFrame()
-    local vertical = this.Or ~= nil and (tonumber(this.Or.x) or 0) ~= 0
-    if vertical then
-        return OPEN_FRAME_DOWN
-    end
-    return openFrame()
-end
-
 function Update(timePassed)
+    local still = holdStill()
+
     if isBroken() then
-        showFrame(brokenFrame())
+        -- The engine holds a broken door open, so without the hold it is
+        -- slid like any other open door.
+        if still or (tonumber(this.Open) or 0) < OPENED then
+            showFrame(REST_FRAME)
+        else
+            showFrame(openFrame())
+        end
         pulseTimer = 0
         settleTimer = 0
         return
@@ -175,10 +214,14 @@ function Update(timePassed)
         settleTimer = settleTimer - timePassed
     end
 
-    if (raw > SHUT and raw < OPENED) or settleTimer > 0 then
+    local partWay = raw > SHUT and raw < OPENED
+    if still and (isOpen or partWay) then
+        showFrame(REST_FRAME)
+        pulseTimer = 0
+    elseif not still and (partWay or settleTimer > 0) then
         showFrame(TRANSITION_FRAME)
         pulseTimer = 0
-    elseif isOpen then
+    elseif not still and isOpen then
         showFrame(openFrame())
         pulseTimer = 0
     else

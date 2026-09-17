@@ -85,15 +85,21 @@ GROUND_CELLS = {"Grass": (0, 4), "Dirt": (5, 4), "Snow": (47, 34), "Stone": (25,
 # combinations are the ones that fall back to another block's art.
 GROUND_ORDER = ["Grass", "Dirt", "Snow", "Stone", "Sand", "Concrete"]
 
-# Doors have five sprites. Frames 0 to 2 are the sealed door with its beams
-# pulsing. Frames 3 and 4 are the open door: the engine slides a door's sprite
-# one door width along the wall as it opens, so each open frame holds the
-# frame and housing (no beams) drawn one door width to one side, and the
-# slide carries it back into the doorway. Which of the two is right depends
-# on the door's open direction; the script picks. That is why every door
-# sprite is three door widths wide, centred on the door: the game draws
-# sprites wider than their object centred at full size, the way its own metal
-# detector is.
+# Doors have nine sprites. Frames 0 to 2 are the sealed door with its beams
+# pulsing, and frame 8 is the same frame with its beams off, which is the open
+# and the broken door. The engine draws a door at its position plus OpenDir
+# times its openness; the door script holds OpenDir at zero, so none of those
+# four ever moves.
+#
+# Frames 3 to 7 are what the script falls back to if it cannot hold OpenDir.
+# The engine then slides the sprite 0.9 of a door width along the wall as the
+# door opens, so each open frame holds the frame and housing (no beams) drawn
+# one slide to one side, and the slide carries it back into the doorway. The
+# slide runs a quarter turn on from the way the door faces, so which frame is
+# right depends on how the door was rotated; the script picks. That is why
+# every flat open frame is three door widths wide, centred on the door: the
+# game draws sprites wider than their object centred at full size, the way its
+# own metal detector is.
 DOOR_FRAMES = 9
 OPEN_FRAME_LEFT = 3
 OPEN_FRAME_RIGHT = 4
@@ -104,11 +110,8 @@ TRANSITION_FRAME = 5
 # uses, pre-shifted down and up respectively. A flat door never shows them.
 OPEN_FRAME_DOWN = 6
 OPEN_FRAME_UP = 7
-# Frame 8 is the frame at rest with its beams off. The script never shows it:
-# a broken door is drawn slid a full slide the way its OpenDir points, so the
-# frame at rest lands outside the doorway and a pre-shifted open frame is what
-# lands in it.
-BROKEN_FRAME = 8
+# Frame 8 is the frame at rest with its beams off.
+REST_FRAME = 8
 DOORS = [
     # name, colour, width in tiles, price, top row of the door's band on sprites.png
     ("LaserDoorRed", "Red", 1, 600, 0),
@@ -147,7 +150,7 @@ OPEN_SLIDE_EXTRA = {1: -6, 2: -12}
 # otherwise show; the large door takes several updates and needs none.
 SETTLE_SECONDS = {1: 0.3, 2: 0.0}
 # Every frame has its own canvas, and the canvas is also the door's hit box,
-# so a frame is only as large as it has to be. Sealed and broken frames are
+# so a frame is only as large as it has to be. Sealed and rest frames are
 # exactly the door. The flat open frames hold the frame shifted one slide to
 # either side, so they are three door widths wide, centred on the door. The
 # vertical-only open frames show nothing flat; their width sets the height
@@ -481,7 +484,7 @@ def fence_defs():
 # ---------------------------------------------------------------- objects
 
 def door_sprite(col, tiles, frame=0):
-    """A frame's flat (east-west) sprite. Sealed and broken frames are the
+    """A frame's flat (east-west) sprite. Sealed and rest frames are the
     door itself. The flat open frames carry the beamless frame shifted one
     slide left or right of centre, so the engine's slide lands it back in
     the doorway. The other frames have nothing to show flat."""
@@ -492,7 +495,7 @@ def door_sprite(col, tiles, frame=0):
     centre = (width - dw) // 2
     if frame < OPEN_FRAME_LEFT:
         im.paste(door_body(col, tiles, frame), (0, 0))
-    elif frame == BROKEN_FRAME:
+    elif frame == REST_FRAME:
         im.paste(door_body(col, tiles, 0, beams=False), (0, 0))
     elif frame == OPEN_FRAME_LEFT:
         im.paste(door_body(col, tiles, 0, beams=False), (centre - slide, 0))
@@ -503,7 +506,7 @@ def door_sprite(col, tiles, frame=0):
 
 def door_sprite_vertical(col, tiles, frame=0):
     """A frame's vertical (north-south wall) sprite, one tile wide. Sealed
-    and broken frames are the door itself. The vertical-only open frames
+    and rest frames are the door itself. The vertical-only open frames
     carry the beamless frame shifted one slide from the tile: the top-aligned
     one hangs down from the tile with the frame below, the other hangs up
     with the frame above. The flat open frames have nothing to show here."""
@@ -513,7 +516,7 @@ def door_sprite_vertical(col, tiles, frame=0):
     im = Image.new("RGBA", (TILE, height), (0, 0, 0, 0))
     if frame < OPEN_FRAME_LEFT:
         im.paste(door_body_vertical(col, tiles, frame), (0, 0))
-    elif frame == BROKEN_FRAME:
+    elif frame == REST_FRAME:
         im.paste(door_body_vertical(col, tiles, 0, beams=False), (0, 0))
     elif frame == OPEN_FRAME_DOWN:
         im.paste(door_body_vertical(col, tiles, 0, beams=False), (0, slide))
@@ -976,7 +979,7 @@ def build_preview():
         d.text((i * 140, y0 + 2), gnd, fill=(255, 255, 0, 255))
     y0 += 150
     x = 0
-    for f in (0, OPEN_FRAME_LEFT, OPEN_FRAME_RIGHT, BROKEN_FRAME):
+    for f in (0, OPEN_FRAME_LEFT, OPEN_FRAME_RIGHT, REST_FRAME):
         t = door_sprite(COLOURS["Blue"], 1, f)
         floor = Image.new("RGBA", t.size, (0, 0, 0, 0))
         floor.paste(ground("Concrete"), ((t.size[0] - TILE) // 2, 0))
