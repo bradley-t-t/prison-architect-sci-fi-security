@@ -1,0 +1,52 @@
+material_LaserFenceRedGrass                 Laser Fence (Red, Grass)
+material_LaserFenceRedDirt                  Laser Fence (Red, Dirt)
+material_LaserFenceRedSnow                  Laser Fence (Red, Snow)
+material_LaserFenceRedStone                 Laser Fence (Red, Stone)
+material_LaserFenceRedSand                  Laser Fence (Red, Sand)
+material_LaserFenceRedConcrete              Laser Fence (Red, Concrete)
+material_LaserFenceBlueGrass                Laser Fence (Blue, Grass)
+material_LaserFenceBlueDirt                 Laser Fence (Blue, Dirt)
+material_LaserFenceBlueSnow                 Laser Fence (Blue, Snow)
+material_LaserFenceBlueStone                Laser Fence (Blue, Stone)
+material_LaserFenceBlueSand                 Laser Fence (Blue, Sand)
+material_LaserFenceBlueConcrete             Laser Fence (Blue, Concrete)
+material_LaserGridRedGrass                  Laser Grid Fence (Red, Grass)
+material_LaserGridRedDirt                   Laser Grid Fence (Red, Dirt)
+material_LaserGridRedSnow                   Laser Grid Fence (Red, Snow)
+material_LaserGridRedStone                  Laser Grid Fence (Red, Stone)
+material_LaserGridRedSand                   Laser Grid Fence (Red, Sand)
+material_LaserGridRedConcrete               Laser Grid Fence (Red, Concrete)
+material_LaserGridBlueGrass                 Laser Grid Fence (Blue, Grass)
+material_LaserGridBlueDirt                  Laser Grid Fence (Blue, Dirt)
+material_LaserGridBlueSnow                  Laser Grid Fence (Blue, Snow)
+material_LaserGridBlueStone                 Laser Grid Fence (Blue, Stone)
+material_LaserGridBlueSand                  Laser Grid Fence (Blue, Sand)
+material_LaserGridBlueConcrete              Laser Grid Fence (Blue, Concrete)
+material_LaserCurtainRedGrass               Laser Curtain Fence (Red, Grass)
+material_LaserCurtainRedDirt                Laser Curtain Fence (Red, Dirt)
+material_LaserCurtainRedSnow                Laser Curtain Fence (Red, Snow)
+material_LaserCurtainRedStone               Laser Curtain Fence (Red, Stone)
+material_LaserCurtainRedSand                Laser Curtain Fence (Red, Sand)
+material_LaserCurtainRedConcrete            Laser Curtain Fence (Red, Concrete)
+material_LaserCurtainBlueGrass              Laser Curtain Fence (Blue, Grass)
+material_LaserCurtainBlueDirt               Laser Curtain Fence (Blue, Dirt)
+material_LaserCurtainBlueSnow               Laser Curtain Fence (Blue, Snow)
+material_LaserCurtainBlueStone              Laser Curtain Fence (Blue, Stone)
+material_LaserCurtainBlueSand               Laser Curtain Fence (Blue, Sand)
+material_LaserCurtainBlueConcrete           Laser Curtain Fence (Blue, Concrete)
+object_LaserDoorRed                         Laser Door (Red)
+buildtoolbar_popup_obj_LaserDoorRed         A doorway sealed by laser beams. It is a locked door: staff with keys open it and prisoners wait to be let through. A guard at a Laser Door Panel within three tiles opens it from there, and a triggered Door Servo opens it too.
+object_LaserDoorBlue                        Laser Door (Blue)
+buildtoolbar_popup_obj_LaserDoorBlue        A doorway sealed by laser beams. It is a locked door: staff with keys open it and prisoners wait to be let through. A guard at a Laser Door Panel within three tiles opens it from there, and a triggered Door Servo opens it too.
+object_LaserDoorLargeRed                    Large Laser Door (Red)
+buildtoolbar_popup_obj_LaserDoorLargeRed    A doorway sealed by laser beams. It is a locked door: staff with keys open it and prisoners wait to be let through. A guard at a Laser Door Panel within three tiles opens it from there, and a triggered Door Servo opens it too.
+object_LaserDoorLargeBlue                   Large Laser Door (Blue)
+buildtoolbar_popup_obj_LaserDoorLargeBlue   A doorway sealed by laser beams. It is a locked door: staff with keys open it and prisoners wait to be let through. A guard at a Laser Door Panel within three tiles opens it from there, and a triggered Door Servo opens it too.
+object_LaserDoorPanel                       Laser Door Panel
+buildtoolbar_popup_obj_LaserDoorPanel       Build it within three tiles of a Laser Door. While a guard stands next to the panel, every Laser Door within reach opens, so a guard can let people through without going to the door.
+tooltip_LaserDoorPanel_Idle                 No guard at the panel.
+tooltip_LaserDoorPanel_Active               Guard at the panel. Laser Doors within reach are open.
+tooltip_LaserDoor_Shut                      Sealed. Staff with keys open it; a guard at a Laser Door Panel or a triggered Door Servo opens it from a distance.
+tooltip_LaserDoor_Open                      Open.
+quickbuild_LaserCellBlock                   Laser Cell Block (500 cells)
+quickbuild_LaserCellWing                    Laser Cell Wing (20 cells)

@@ -1,0 +1,559 @@
+BEGIN Material
+    Name                 LaserFenceRedGrass
+    ConstructionTime     10.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -40
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 24  y 0  END
+END
+
+BEGIN Material
+    Name                 LaserFenceRedDirt
+    ConstructionTime     10.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -40
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 31  y 0  END
+END
+
+BEGIN Material
+    Name                 LaserFenceRedSnow
+    ConstructionTime     10.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -40
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 38  y 0  END
+END
+
+BEGIN Material
+    Name                 LaserFenceRedStone
+    ConstructionTime     10.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -40
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 45  y 0  END
+END
+
+BEGIN Material
+    Name                 LaserFenceRedSand
+    ConstructionTime     10.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -40
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 52  y 0  END
+END
+
+BEGIN Material
+    Name                 LaserFenceRedConcrete
+    ConstructionTime     10.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -40
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 56  y 3  END
+END
+
+BEGIN Material
+    Name                 LaserFenceBlueGrass
+    ConstructionTime     10.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -40
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 32  y 4  END
+END
+
+BEGIN Material
+    Name                 LaserFenceBlueDirt
+    ConstructionTime     10.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -40
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 39  y 4  END
+END
+
+BEGIN Material
+    Name                 LaserFenceBlueSnow
+    ConstructionTime     10.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -40
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 46  y 4  END
+END
+
+BEGIN Material
+    Name                 LaserFenceBlueStone
+    ConstructionTime     10.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -40
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 50  y 7  END
+END
+
+BEGIN Material
+    Name                 LaserFenceBlueSand
+    ConstructionTime     10.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -40
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 57  y 7  END
+END
+
+BEGIN Material
+    Name                 LaserFenceBlueConcrete
+    ConstructionTime     10.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -40
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 32  y 8  END
+END
+
+BEGIN Material
+    Name                 LaserGridRedGrass
+    ConstructionTime     12.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -60
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 39  y 8  END
+END
+
+BEGIN Material
+    Name                 LaserGridRedDirt
+    ConstructionTime     12.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -60
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 43  y 11  END
+END
+
+BEGIN Material
+    Name                 LaserGridRedSnow
+    ConstructionTime     12.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -60
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 50  y 11  END
+END
+
+BEGIN Material
+    Name                 LaserGridRedStone
+    ConstructionTime     12.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -60
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 57  y 11  END
+END
+
+BEGIN Material
+    Name                 LaserGridRedSand
+    ConstructionTime     12.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -60
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 32  y 12  END
+END
+
+BEGIN Material
+    Name                 LaserGridRedConcrete
+    ConstructionTime     12.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -60
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 36  y 15  END
+END
+
+BEGIN Material
+    Name                 LaserGridBlueGrass
+    ConstructionTime     12.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -60
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 43  y 15  END
+END
+
+BEGIN Material
+    Name                 LaserGridBlueDirt
+    ConstructionTime     12.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -60
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 50  y 15  END
+END
+
+BEGIN Material
+    Name                 LaserGridBlueSnow
+    ConstructionTime     12.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -60
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 57  y 15  END
+END
+
+BEGIN Material
+    Name                 LaserGridBlueStone
+    ConstructionTime     12.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -60
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 29  y 18  END
+END
+
+BEGIN Material
+    Name                 LaserGridBlueSand
+    ConstructionTime     12.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -60
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 36  y 19  END
+END
+
+BEGIN Material
+    Name                 LaserGridBlueConcrete
+    ConstructionTime     12.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -60
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 43  y 19  END
+END
+
+BEGIN Material
+    Name                 LaserCurtainRedGrass
+    ConstructionTime     10.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -50
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 50  y 19  END
+END
+
+BEGIN Material
+    Name                 LaserCurtainRedDirt
+    ConstructionTime     10.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -50
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 57  y 19  END
+END
+
+BEGIN Material
+    Name                 LaserCurtainRedSnow
+    ConstructionTime     10.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -50
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 42  y 23  END
+END
+
+BEGIN Material
+    Name                 LaserCurtainRedStone
+    ConstructionTime     10.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -50
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 49  y 23  END
+END
+
+BEGIN Material
+    Name                 LaserCurtainRedSand
+    ConstructionTime     10.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -50
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 56  y 23  END
+END
+
+BEGIN Material
+    Name                 LaserCurtainRedConcrete
+    ConstructionTime     10.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -50
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 6  y 27  END
+END
+
+BEGIN Material
+    Name                 LaserCurtainBlueGrass
+    ConstructionTime     10.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -50
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 42  y 27  END
+END
+
+BEGIN Material
+    Name                 LaserCurtainBlueDirt
+    ConstructionTime     10.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -50
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 49  y 27  END
+END
+
+BEGIN Material
+    Name                 LaserCurtainBlueSnow
+    ConstructionTime     10.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -50
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 56  y 27  END
+END
+
+BEGIN Material
+    Name                 LaserCurtainBlueStone
+    ConstructionTime     10.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -50
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 35  y 60  END
+END
+
+BEGIN Material
+    Name                 LaserCurtainBlueSand
+    ConstructionTime     10.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -50
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 42  y 27  END
+END
+
+BEGIN Material
+    Name                 LaserCurtainBlueConcrete
+    ConstructionTime     10.0000
+    BlockMovement        true
+    MoveCost             0.400000
+    SoftEdged            -1
+    Price                -50
+    SpriteType           Connected
+    NumSprites           1
+    BEGIN Sprite0    x 42  y 27  END
+END
+
+BEGIN Object
+    Name                 LaserDoorRed
+    ConstructionTime     15.00000
+    Toughness            300.000
+    Teleportable         true
+    Price                -600
+    RenderDepth          2
+    Group                StaticObject
+    BlockedBy            StaticObject
+    BlockedBy            UtilityStation
+    MadeOf               SolidMetal
+    Properties           StaticObject
+    Properties           Door
+    Properties           Scripted
+    NumSprites           9
+    BEGIN Sprite         x 0  y 4  w 2  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 8  y 4  w 2  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 16  y 4  w 2  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 24  y 4  w 6  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 40  y 4  w 6  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 56  y 4  w 2  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 64  y 0  w 4  h 2  RotateType 1  TopAligned true  END
+    BEGIN Sprite         x 76  y 4  w 4  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 88  y 4  w 2  h 2  RotateType 1  TopAligned false  END
+END
+
+BEGIN Object
+    Name                 LaserDoorBlue
+    ConstructionTime     15.00000
+    Toughness            300.000
+    Teleportable         true
+    Price                -600
+    RenderDepth          2
+    Group                StaticObject
+    BlockedBy            StaticObject
+    BlockedBy            UtilityStation
+    MadeOf               SolidMetal
+    Properties           StaticObject
+    Properties           Door
+    Properties           Scripted
+    NumSprites           9
+    BEGIN Sprite         x 0  y 10  w 2  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 8  y 10  w 2  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 16  y 10  w 2  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 24  y 10  w 6  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 40  y 10  w 6  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 56  y 10  w 2  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 64  y 6  w 4  h 2  RotateType 1  TopAligned true  END
+    BEGIN Sprite         x 76  y 10  w 4  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 88  y 10  w 2  h 2  RotateType 1  TopAligned false  END
+END
+
+BEGIN Object
+    Name                 LaserDoorLargeRed
+    Width                2
+    ConstructionTime     15.00000
+    Toughness            300.000
+    Teleportable         true
+    Price                -900
+    RenderDepth          2
+    Group                StaticObject
+    BlockedBy            StaticObject
+    BlockedBy            UtilityStation
+    MadeOf               SolidMetal
+    Properties           StaticObject
+    Properties           Door
+    Properties           Scripted
+    NumSprites           9
+    BEGIN Sprite         x 0  y 22  w 4  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 12  y 22  w 4  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 24  y 22  w 4  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 36  y 22  w 12  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 64  y 22  w 12  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 92  y 22  w 4  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 104  y 12  w 8  h 2  RotateType 1  TopAligned true  END
+    BEGIN Sprite         x 124  y 22  w 8  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 144  y 22  w 4  h 2  RotateType 1  TopAligned false  END
+END
+
+BEGIN Object
+    Name                 LaserDoorLargeBlue
+    Width                2
+    ConstructionTime     15.00000
+    Toughness            300.000
+    Teleportable         true
+    Price                -900
+    RenderDepth          2
+    Group                StaticObject
+    BlockedBy            StaticObject
+    BlockedBy            UtilityStation
+    MadeOf               SolidMetal
+    Properties           StaticObject
+    Properties           Door
+    Properties           Scripted
+    NumSprites           9
+    BEGIN Sprite         x 0  y 34  w 4  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 12  y 34  w 4  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 24  y 34  w 4  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 36  y 34  w 12  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 64  y 34  w 12  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 92  y 34  w 4  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 104  y 24  w 8  h 2  RotateType 1  TopAligned true  END
+    BEGIN Sprite         x 124  y 34  w 8  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 144  y 34  w 4  h 2  RotateType 1  TopAligned false  END
+END
+
+BEGIN Object
+    Name                 LaserDoorPanel
+    Width                1
+    Height               1
+    ConstructionTime     10.0000
+    Toughness            50.0000
+    Price                -400
+    Filter               Security
+    AttachToWall         false
+    Group                StaticObject
+    BlockedBy            Wall
+    BlockedBy            StaticObject
+    BlockedBy            UtilityStation
+    MadeOf               Composite
+    Properties           StaticObject
+    Properties           Scripted
+    NumSprites           3
+    BEGIN Sprite         x 0  y 36  w 2  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 8  y 36  w 2  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 16  y 36  w 2  h 2  RotateType 1  TopAligned false  END
+END
