@@ -104,9 +104,10 @@ TRANSITION_FRAME = 5
 # uses, pre-shifted down and up respectively. A flat door never shows them.
 OPEN_FRAME_DOWN = 6
 OPEN_FRAME_UP = 7
-# Frame 8 is the frame at rest with its beams off: a broken door is drawn
-# without the engine's slide, so a pre-shifted open frame would sit beside
-# the doorway instead of in it.
+# Frame 8 is the frame at rest with its beams off. The script never shows it:
+# a broken door is drawn slid a full slide the way its OpenDir points, so the
+# frame at rest lands outside the doorway and a pre-shifted open frame is what
+# lands in it.
 BROKEN_FRAME = 8
 DOORS = [
     # name, colour, width in tiles, price, top row of the door's band on sprites.png

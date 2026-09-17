@@ -15,9 +15,12 @@
 -- 5 is empty: it is shown on any tick that still reports the door part-way
 -- open, and for a short settle time after each change of state, which
 -- covers the renderer catching up with a change made within one update.
--- Sprite 8 is the frame at rest with its beams off, shown while the door is
--- broken: the engine draws a broken door without its slide, so a shifted
--- open frame would sit beside the doorway.
+-- A broken door is drawn slid too, by the same distance, but always the way
+-- its OpenDir points: up a north-south wall, which is the opposite way from
+-- that door standing open, and left along an east-west wall, which is the
+-- same way. So a broken door in a north-south wall shows sprite 6, and one
+-- in an east-west wall shows its ordinary open frame. Sprite 8, the frame
+-- drawn at rest, lands a full slide outside the doorway and is never shown.
 
 local SCAN_INTERVAL = 0.2
 local PANEL_REACH = 3.5
@@ -30,8 +33,8 @@ local OPEN_FRAME_RIGHT = 4
 local TRANSITION_FRAME = 5
 local OPEN_FRAME_DOWN = 6
 local OPEN_FRAME_UP = 7
-local BROKEN_FRAME = 8
-local BROKEN_AT = 0.999
+-- The engine treats an object as broken from this much damage.
+local BROKEN_AT = 0.7
 local SHUT = 0.02
 local OPENED = 0.98
 -- Set per door by the build: the single door needs it, the large door does not.
@@ -120,9 +123,17 @@ local function isBroken()
     return (tonumber(this.Damage) or 0) >= BROKEN_AT
 end
 
+local function brokenFrame()
+    local vertical = this.Or ~= nil and (tonumber(this.Or.x) or 0) ~= 0
+    if vertical then
+        return OPEN_FRAME_DOWN
+    end
+    return openFrame()
+end
+
 function Update(timePassed)
     if isBroken() then
-        showFrame(BROKEN_FRAME)
+        showFrame(brokenFrame())
         pulseTimer = 0
         settleTimer = 0
         return
