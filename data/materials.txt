@@ -319,7 +319,7 @@ BEGIN Material
     Price                -50
     SpriteType           Connected
     NumSprites           1
-    BEGIN Sprite0    x 42  y 23  END
+    BEGIN Sprite0    x 19  y 21  END
 END
 
 BEGIN Material
@@ -331,7 +331,7 @@ BEGIN Material
     Price                -50
     SpriteType           Connected
     NumSprites           1
-    BEGIN Sprite0    x 49  y 23  END
+    BEGIN Sprite0    x 26  y 22  END
 END
 
 BEGIN Material
@@ -343,7 +343,7 @@ BEGIN Material
     Price                -50
     SpriteType           Connected
     NumSprites           1
-    BEGIN Sprite0    x 56  y 23  END
+    BEGIN Sprite0    x 33  y 23  END
 END
 
 BEGIN Material
@@ -355,7 +355,7 @@ BEGIN Material
     Price                -50
     SpriteType           Connected
     NumSprites           1
-    BEGIN Sprite0    x 6  y 27  END
+    BEGIN Sprite0    x 40  y 23  END
 END
 
 BEGIN Material
@@ -367,7 +367,7 @@ BEGIN Material
     Price                -50
     SpriteType           Connected
     NumSprites           1
-    BEGIN Sprite0    x 42  y 27  END
+    BEGIN Sprite0    x 47  y 23  END
 END
 
 BEGIN Material
@@ -379,7 +379,7 @@ BEGIN Material
     Price                -50
     SpriteType           Connected
     NumSprites           1
-    BEGIN Sprite0    x 49  y 27  END
+    BEGIN Sprite0    x 54  y 23  END
 END
 
 BEGIN Material
@@ -391,7 +391,7 @@ BEGIN Material
     Price                -50
     SpriteType           Connected
     NumSprites           1
-    BEGIN Sprite0    x 56  y 27  END
+    BEGIN Sprite0    x 19  y 25  END
 END
 
 BEGIN Material
@@ -403,7 +403,7 @@ BEGIN Material
     Price                -50
     SpriteType           Connected
     NumSprites           1
-    BEGIN Sprite0    x 35  y 60  END
+    BEGIN Sprite0    x 26  y 26  END
 END
 
 BEGIN Material
@@ -415,7 +415,7 @@ BEGIN Material
     Price                -50
     SpriteType           Connected
     NumSprites           1
-    BEGIN Sprite0    x 42  y 27  END
+    BEGIN Sprite0    x 6  y 27  END
 END
 
 BEGIN Material
@@ -427,7 +427,7 @@ BEGIN Material
     Price                -50
     SpriteType           Connected
     NumSprites           1
-    BEGIN Sprite0    x 42  y 27  END
+    BEGIN Sprite0    x 33  y 27  END
 END
 
 BEGIN Object

@@ -30,3 +30,6 @@ game's mod folder, then enable it under Extras, Mods.
 | `data/scripts/` | One Lua script per door, and the panel |
 | `data/prefabs.txt` | The Quick Build prefabs |
 | `data/language/base-language.txt` | The names and tooltips the game shows |
+| `tools/gen_assets.py` | Builds `data/` from scratch: the tileset, the sprite sheet, `materials.txt`, the prefabs and the door scripts |
+| `tools/LaserDoor.lua` | The door script every door's copy is generated from |
+| `tools/install.py` | Copies the mod into the game's mod folder |
