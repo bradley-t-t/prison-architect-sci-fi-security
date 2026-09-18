@@ -48,5 +48,10 @@ tooltip_LaserDoorPanel_Idle                 No guard at the panel.
 tooltip_LaserDoorPanel_Active               Guard at the panel. Laser Doors within reach are open.
 tooltip_LaserDoor_Shut                      Sealed. Staff with keys open it; a guard at a Laser Door Panel or a triggered Door Servo opens it from a distance.
 tooltip_LaserDoor_Open                      Open.
+tooltip_LaserDoor_Auto                      Automatic. The AI Laser Controller opens it for whoever is allowed through and shuts it behind them.
+tooltip_LaserDoor_Sealed                    Sealed against a misbehaving prisoner. Staff with keys can still open it.
+object_AILaserController                    AI Laser Controller
+buildtoolbar_popup_obj_AILaserController    Build one anywhere in the prison and every Laser Door becomes automatic: it opens for staff and for prisoners going about their day and shuts behind them, with no guard needed. A door seals itself the moment a misbehaving prisoner is beside it. One controller runs every door on the map.
+tooltip_AILaserController                   Running every Laser Door in the prison.
 quickbuild_LaserCellBlock                   Laser Cell Block (500 cells)
 quickbuild_LaserCellWing                    Laser Cell Wing (20 cells)

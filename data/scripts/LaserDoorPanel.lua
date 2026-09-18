@@ -1,7 +1,8 @@
--- Laser Door Panel. Each Laser Door checks for itself whether a guard is
--- standing at a panel within its reach; the panel's own job is only to show
--- that state. Sprite 0 is the idle console; sprites 1 and 2 alternate to
--- blink the status lamp while a guard is at the panel.
+-- Laser Door Panel. The panel watches for a guard standing at it and shows
+-- it: sprite 0 is the idle console, and sprites 1 and 2 alternate to blink
+-- the status lamp while a guard is there. Each Laser Door within reach reads
+-- that lamp rather than looking for guards itself, so the lamp is the signal
+-- as well as the display.
 
 local SCAN_INTERVAL = 0.25
 local GUARD_REACH = 1.6

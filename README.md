@@ -8,6 +8,14 @@ A Prison Architect mod. It adds laser fences and laser doors.
 - Single and double Laser Doors in red or blue. A door opens from a Laser Door
   Panel while a guard stands at it, or from a triggered Door Servo, so
   prisoners cannot pass on their own.
+- The AI Laser Controller. Build one anywhere in the prison and every Laser
+  Door becomes automatic, with no guard needed: a door opens for staff and
+  for prisoners going about their day and shuts behind them. The game only
+  sends people where they are allowed to go, so a door still keeps a
+  prisoner out of a staff-only area. A door seals itself the moment a
+  misbehaving prisoner is beside it, and for a few seconds afterwards is an
+  ordinary locked door that staff with keys can open. One controller runs
+  every door on the map, and with none the doors are locked doors as before.
 
 ## Install
 
@@ -24,10 +32,10 @@ game's mod folder, then enable it under Extras, Mods.
 | Path | Holds |
 | :--- | :--- |
 | `manifest.txt` | The name, description and version the mod screen shows |
-| `data/materials.txt` | The fence materials, the doors and the Laser Door Panel |
+| `data/materials.txt` | The fence materials, the doors, the Laser Door Panel and the AI Laser Controller |
 | `data/tilesetpadded.png` | The game's tileset with the fence tiles added |
-| `data/sprites.png` | The door and panel sprites |
-| `data/scripts/` | One Lua script per door, and the panel |
+| `data/sprites.png` | The door, panel and controller sprites |
+| `data/scripts/` | One Lua script per door, the panel and the controller |
 | `data/prefabs.txt` | The Quick Build prefabs |
 | `data/language/base-language.txt` | The names and tooltips the game shows |
 | `tools/gen_assets.py` | Builds `data/` from scratch: the tileset, the sprite sheet, `materials.txt`, the prefabs and the door scripts |

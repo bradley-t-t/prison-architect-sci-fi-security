@@ -4,6 +4,18 @@
 -- top of that the script opens it from a distance while a guard stands at a
 -- Laser Door Panel within reach or a Door Servo on the door is triggered.
 --
+-- An AI Laser Controller anywhere on the map makes the door automatic. The
+-- script then asks the game to unlock it, and the game opens and shuts it
+-- for whoever walks up, staff and prisoners alike, by its own rules for an
+-- unlocked door: it opens for someone whose route goes through it and shuts
+-- behind them, and the game only routes people where they are allowed to
+-- go. The controller is not a fool, though. The moment the door starts to
+-- open, and for as long as it stands open, it looks at the prisoners beside
+-- it, and if one of them is misbehaving (fighting, rioting, escaping) it
+-- slams shut and goes back to being a locked door for a few seconds, which
+-- staff with keys can still open. With no controller on the map the door is
+-- the locked door it always was.
+--
 -- The engine draws a door at its position plus OpenDir times its openness,
 -- which is how its own doors slide into the wall. A laser door's frame must
 -- not move, so the script holds OpenDir at zero and the sprite stays in the
@@ -41,12 +53,22 @@
 --   looks the door reads the remembered servo's trigger and the remembered
 --   panel's own light, which the panel's script sets while a guard stands at
 --   it. A door with neither, which is nearly all of them, reads nothing.
+--   The controller is looked for once every CONTROL_FIND_EVERY seconds, and
+--   prisoners are looked at only while the door is opening or open, which
+--   for nearly every door is nearly never.
 --   Each door starts its timers at a random point, so hundreds of doors
 --   built together do not all look around on the same tick.
 
 local STEP = 0.05
 local SCAN_INTERVAL = 0.2
 local FIND_EVERY = 4
+local CONTROLLER = "AILaserController"
+local CONTROL_FIND_EVERY = 10
+local CONTROL_REACH = 5000   -- tiles; wider than any map
+-- How near a misbehaving prisoner seals an automatic door, and for how long
+-- it stays an ordinary locked door afterwards.
+local THREAT_REACH = 3
+local LOCKOUT = 4
 local PANEL_REACH = 3.5
 local SERVO_REACH = 1.0
 local PULSE_INTERVAL = 0.12
@@ -81,6 +103,13 @@ local servos = {}
 local panels = {}
 local findTimer = FIND_EVERY
 local findAfter = FIND_EVERY
+-- Whether a controller stands on the map, when to look again, and how long
+-- the door has left as a locked door after sealing against someone.
+local controlled = false
+local controlTimer = CONTROL_FIND_EVERY
+local controlAfter = CONTROL_FIND_EVERY
+local lockout = 0
+local threatTimer = 0
 local pulseTimer = 0
 local settleTimer = 0
 local frame = -1
@@ -157,6 +186,82 @@ local function guardAtPanel()
         end
     end
     return false
+end
+
+local function showTooltip()
+    if remoteOpen then
+        this.Tooltip = "tooltip_LaserDoor_Open"
+    elseif controlled then
+        this.Tooltip = lockout > 0 and "tooltip_LaserDoor_Sealed" or "tooltip_LaserDoor_Auto"
+    else
+        this.Tooltip = "tooltip_LaserDoor_Shut"
+    end
+end
+
+local function lookForController()
+    local found = next(nearby(CONTROLLER, CONTROL_REACH)) ~= nil
+    controlAfter = CONTROL_FIND_EVERY * (0.75 + 0.5 * math.random())
+    if found ~= controlled then
+        controlled = found
+        lockout = 0
+        this.Locked = not controlled
+        showTooltip()
+    end
+end
+
+-- The game keeps a prisoner's misbehaviour as a name or a number, and
+-- either way nothing, zero and "None" are a prisoner behaving.
+local function misbehaving(prisoner)
+    local what = prisoner.Misbehavior
+    if what == nil or what == "" or what == "None" then
+        return false
+    end
+    local n = tonumber(what)
+    return n == nil or n ~= 0
+end
+
+local function threatAtDoor()
+    for prisoner, _ in pairs(nearby("Prisoner", THREAT_REACH)) do
+        if prisoner ~= nil and misbehaving(prisoner) then
+            return true
+        end
+    end
+    return false
+end
+
+-- Runs the automatic door's guard against trouble. Returns true on the step
+-- it seals the door.
+local function watchForTrouble(timePassed, raw)
+    if lockout > 0 then
+        lockout = lockout - timePassed
+        if lockout <= 0 then
+            if threatAtDoor() then
+                lockout = LOCKOUT
+            else
+                lockout = 0
+                this.Locked = false
+                showTooltip()
+            end
+        end
+        return false
+    end
+    if raw <= SHUT then
+        threatTimer = SCAN_INTERVAL   -- look the moment it next starts to open
+        return false
+    end
+    threatTimer = threatTimer + timePassed
+    if threatTimer < SCAN_INTERVAL then
+        return false
+    end
+    threatTimer = 0
+    if not threatAtDoor() then
+        return false
+    end
+    lockout = LOCKOUT
+    this.Locked = true
+    this.Open = 0
+    showTooltip()
+    return true
 end
 
 local function holdStill(timePassed)
@@ -269,11 +374,21 @@ function Update(tick)
         local open = servoWantsOpen() or guardAtPanel()
         if open ~= remoteOpen then
             remoteOpen = open
-            this.Tooltip = remoteOpen and "tooltip_LaserDoor_Open" or "tooltip_LaserDoor_Shut"
+            showTooltip()
         end
     end
 
+    controlTimer = controlTimer + timePassed
+    if controlTimer >= controlAfter then
+        controlTimer = 0
+        lookForController()
+    end
+
     local raw = tonumber(this.Open) or 0
+    if controlled and not remoteOpen and watchForTrouble(timePassed, raw) then
+        raw = 0
+        lastRaw = 0
+    end
     local openness = raw
     if remoteOpen then
         openness = 1

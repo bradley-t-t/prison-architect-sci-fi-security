@@ -157,6 +157,10 @@ SETTLE_SECONDS = {1: 0.3, 2: 0.0}
 # of their vertical versions, a door plus one slide, hanging up or down.
 PANEL_BAND = 36
 PANEL_STRIDE = 8
+# The AI Laser Controller sits in the panel's band, past the panel's frames.
+# It never rotates, so each frame is one picture two cells wide.
+CONTROLLER_FRAMES = 2
+CONTROLLER_X0 = PANEL_STRIDE * 3
 SHEET_CELLS = (156, 38)
 
 
@@ -632,6 +636,31 @@ def panel_sprite(frame=0):
     return im
 
 
+def controller_sprite(frame=0):
+    """A server cabinet seen from the front, bottom-aligned in its tile: a
+    dark case, a column of drive lights, and a blue eye that is lit in frame
+    0 and dim in frame 1."""
+    im = Image.new("RGBA", (TILE, TILE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    d.rectangle([10, 58, 54, 62], fill=(0, 0, 0, 90))
+    d.rectangle([12, 6, 51, 60], fill=DARK + (255,))
+    d.rectangle([12, 6, 51, 8], fill=DARK_HI + (255,))
+    d.rectangle([12, 6, 14, 60], fill=DARK_HI + (255,))
+    d.rectangle([49, 6, 51, 60], fill=(30, 33, 38, 255))
+    d.rectangle([17, 11, 46, 31], fill=(16, 40, 80, 255))
+    lit = frame == 0
+    d.ellipse([24, 13, 39, 28], fill=(26, 78, 140, 255))
+    d.ellipse([27, 16, 36, 25], fill=(72, 165, 255, 255) if lit else (22, 78, 190, 255))
+    if lit:
+        d.ellipse([29, 17, 33, 21], fill=(205, 235, 255, 255))
+    for i, y in enumerate(range(36, 56, 5)):
+        d.rectangle([17, y, 46, y + 2], fill=(30, 33, 38, 255))
+        on = (i + frame) % 2 == 0
+        d.rectangle([19, y, 21, y + 2], fill=(84, 220, 120, 255) if on else (24, 120, 60, 255))
+        d.rectangle([24, y, 26, y + 2], fill=(72, 165, 255, 255) if not on else (22, 78, 190, 255))
+    return im
+
+
 # ---------------------------------------------------------------- tileset
 
 def padded(tile):
@@ -867,6 +896,29 @@ END
     NumSprites           {PANEL_FRAMES}
 {panel_sprites}END
 """)
+    controller_sprites = "".join(
+        f"    BEGIN Sprite         x {CONTROLLER_X0 + 2 * f}  y {PANEL_BAND}  w 2  h 2  RotateType 0  TopAligned false  END\n"
+        for f in range(CONTROLLER_FRAMES))
+    out.append(f"""BEGIN Object
+    Name                 AILaserController
+    Width                1
+    Height               1
+    ConstructionTime     20.0000
+    Toughness            100.000
+    Price                -5000
+    Filter               Security
+    AttachToWall         false
+    Group                StaticObject
+    BlockedBy            Wall
+    BlockedBy            StaticObject
+    BlockedBy            UtilityStation
+    MadeOf               SolidMetal
+    Properties           StaticObject
+    Properties           Scripted
+    NumSprites           {CONTROLLER_FRAMES}
+    BEGIN ToolbarSprite  x {CONTROLLER_X0}  y {PANEL_BAND}  w 2  h 2  END
+{controller_sprites}END
+""")
     return "\n".join(out)
 
 
@@ -888,6 +940,11 @@ def language_text():
         f"{'tooltip_LaserDoorPanel_Active':<43} Guard at the panel. Laser Doors within reach are open.",
         f"{'tooltip_LaserDoor_Shut':<43} Sealed. Staff with keys open it; a guard at a Laser Door Panel or a triggered Door Servo opens it from a distance.",
         f"{'tooltip_LaserDoor_Open':<43} Open.",
+        f"{'tooltip_LaserDoor_Auto':<43} Automatic. The AI Laser Controller opens it for whoever is allowed through and shuts it behind them.",
+        f"{'tooltip_LaserDoor_Sealed':<43} Sealed against a misbehaving prisoner. Staff with keys can still open it.",
+        f"{'object_AILaserController':<43} AI Laser Controller",
+        f"{'buildtoolbar_popup_obj_AILaserController':<43} Build one anywhere in the prison and every Laser Door becomes automatic: it opens for staff and for prisoners going about their day and shuts behind them, with no guard needed. A door seals itself the moment a misbehaving prisoner is beside it. One controller runs every door on the map.",
+        f"{'tooltip_AILaserController':<43} Running every Laser Door in the prison.",
     ]
     for name, label, per_row, units in PREFABS:
         lines.append(f"{'quickbuild_' + name:<43} {label} ({per_row * 2 * units} cells)")
@@ -913,6 +970,8 @@ def write_text_files(placements, data_dir):
         with open(os.path.join(data_dir, "scripts", name + ".lua"), "w", encoding="utf-8", newline="\n") as f:
             f.write(script)
     shutil.copyfile(os.path.join(TOOLS, "LaserDoorPanel.lua"), os.path.join(data_dir, "scripts", "LaserDoorPanel.lua"))
+    shutil.copyfile(os.path.join(TOOLS, "AILaserController.lua"),
+                    os.path.join(data_dir, "scripts", "AILaserController.lua"))
 
 
 # ---------------------------------------------------------------- output
@@ -939,6 +998,8 @@ def build_sprites():
         sheet.paste(base.transpose(Image.ROTATE_180), ((x0 + 2) * 32, PANEL_BAND * 32))
         sheet.paste(base.transpose(Image.ROTATE_270), ((x0 + 4) * 32, PANEL_BAND * 32))
         sheet.paste(base.transpose(Image.ROTATE_90), ((x0 + 6) * 32, PANEL_BAND * 32))
+    for f in range(CONTROLLER_FRAMES):
+        sheet.paste(controller_sprite(f), ((CONTROLLER_X0 + 2 * f) * 32, PANEL_BAND * 32))
     return sheet
 
 

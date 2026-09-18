@@ -557,3 +557,25 @@ BEGIN Object
     BEGIN Sprite         x 8  y 36  w 2  h 2  RotateType 1  TopAligned false  END
     BEGIN Sprite         x 16  y 36  w 2  h 2  RotateType 1  TopAligned false  END
 END
+
+BEGIN Object
+    Name                 AILaserController
+    Width                1
+    Height               1
+    ConstructionTime     20.0000
+    Toughness            100.000
+    Price                -5000
+    Filter               Security
+    AttachToWall         false
+    Group                StaticObject
+    BlockedBy            Wall
+    BlockedBy            StaticObject
+    BlockedBy            UtilityStation
+    MadeOf               SolidMetal
+    Properties           StaticObject
+    Properties           Scripted
+    NumSprites           2
+    BEGIN ToolbarSprite  x 24  y 36  w 2  h 2  END
+    BEGIN Sprite         x 24  y 36  w 2  h 2  RotateType 0  TopAligned false  END
+    BEGIN Sprite         x 26  y 36  w 2  h 2  RotateType 0  TopAligned false  END
+END
