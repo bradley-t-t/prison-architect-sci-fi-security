@@ -28,6 +28,11 @@
 -- against it is tazed the way a guard's tazer would drop them, and the door's
 -- own damage is wiped the same tick. So it can never be broken open, and a
 -- prisoner who swings at it is put on the floor rather than through it.
+--
+-- Every read of a property on this is a call into the engine, and a prison
+-- can hold hundreds of these doors each updated every tick, so the script
+-- reads as little as it can. A tick that changes nothing reads the damage
+-- and the openness and nothing else.
 
 local SCAN_INTERVAL = 0.2
 local PANEL_REACH = 3.5
@@ -52,6 +57,9 @@ local SETTLE = 0.0
 local ZAP_REACH = 1.5
 local STUN = 60
 local DAMAGE_EPSILON = 0.001
+-- The engine works out OpenDir once, when it initialises the door, and never
+-- again. Once it has been seen at zero it is only looked at this often.
+local HOLD_RECHECK = 0.5
 
 local GUARDS = { "Guard", "ArmedGuard", "RiotGuard", "Sniper", "DogHandler" }
 
@@ -63,6 +71,8 @@ local frame = -1
 local lastRaw = 0
 local wasOpen = false
 local lastDamage = 0
+local held = false
+local holdTimer = 0
 
 local function showFrame(n)
     if frame ~= n then
@@ -78,6 +88,7 @@ end
 local function shockAttackers()
     -- Damage only rises when something is hitting the door. When it does, taze
     -- every prisoner against the door, then wipe the damage so it never breaks.
+    -- Returns the damage the door is left with, read back only after a wipe.
     local dmg = tonumber(this.Damage) or 0
     if dmg > lastDamage + DAMAGE_EPSILON then
         for prisoner, _ in pairs(nearby("Prisoner", ZAP_REACH)) do
@@ -86,10 +97,12 @@ local function shockAttackers()
             end
         end
     end
+    lastDamage = 0
     if dmg > 0 then
         this.Damage = 0
+        return tonumber(this.Damage) or 0
     end
-    lastDamage = 0
+    return dmg
 end
 
 local function servoWantsOpen()
@@ -126,8 +139,17 @@ local function guardAtPanel()
     return false
 end
 
-local function holdStill()
-    -- True once the engine has no slide left to apply to this door.
+local function holdStill(timePassed)
+    -- True once the engine has no slide left to apply to this door. Between
+    -- rechecks the last answer stands.
+    if held then
+        holdTimer = holdTimer + timePassed
+        if holdTimer < HOLD_RECHECK then
+            return true
+        end
+        holdTimer = 0
+    end
+    held = false
     local dir = this.OpenDir
     if dir == nil then
         return false
@@ -136,13 +158,18 @@ local function holdStill()
     if x == nil or y == nil then
         return false
     end
+    if x == 0 and y == 0 then
+        held = true
+        return true
+    end
     if x ~= 0 then
         dir.x = 0
     end
     if y ~= 0 then
         dir.y = 0
     end
-    return tonumber(dir.x) == 0 and tonumber(dir.y) == 0
+    held = tonumber(dir.x) == 0 and tonumber(dir.y) == 0
+    return held
 end
 
 local function slideDirection()
@@ -186,16 +213,12 @@ function Create()
     showFrame(0)
 end
 
-local function isBroken()
-    return (tonumber(this.Damage) or 0) >= BROKEN_AT
-end
-
 function Update(timePassed)
-    shockAttackers()
+    local damage = shockAttackers()
 
-    local still = holdStill()
+    local still = holdStill(timePassed)
 
-    if isBroken() then
+    if damage >= BROKEN_AT then
         -- The engine holds a broken door open, so without the hold it is
         -- slid like any other open door.
         if still or (tonumber(this.Open) or 0) < OPENED then
