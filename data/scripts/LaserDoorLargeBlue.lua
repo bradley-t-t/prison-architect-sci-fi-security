@@ -23,6 +23,11 @@
 -- width, so which one that is depends on how the door was rotated. Sprite 5
 -- is empty: it covers the ticks where the door is part-way and the settle
 -- time after each change of state, while the renderer catches up.
+--
+-- The beams bite back. Any tick the door takes damage, whoever is standing
+-- against it is tazed the way a guard's tazer would drop them, and the door's
+-- own damage is wiped the same tick. So it can never be broken open, and a
+-- prisoner who swings at it is put on the floor rather than through it.
 
 local SCAN_INTERVAL = 0.2
 local PANEL_REACH = 3.5
@@ -42,6 +47,11 @@ local SHUT = 0.02
 local OPENED = 0.98
 -- Set per door by the build: the single door needs it, the large door does not.
 local SETTLE = 0.0
+-- The stun a hit earns: how far from the door a prisoner counts as touching it,
+-- and how long the taze lasts. 60 is a guard tazer's full charge.
+local ZAP_REACH = 1.5
+local STUN = 60
+local DAMAGE_EPSILON = 0.001
 
 local GUARDS = { "Guard", "ArmedGuard", "RiotGuard", "Sniper", "DogHandler" }
 
@@ -52,6 +62,7 @@ local settleTimer = 0
 local frame = -1
 local lastRaw = 0
 local wasOpen = false
+local lastDamage = 0
 
 local function showFrame(n)
     if frame ~= n then
@@ -62,6 +73,23 @@ end
 
 local function nearby(kind, range)
     return Object.GetNearbyObjects(kind, range) or {}
+end
+
+local function shockAttackers()
+    -- Damage only rises when something is hitting the door. When it does, taze
+    -- every prisoner against the door, then wipe the damage so it never breaks.
+    local dmg = tonumber(this.Damage) or 0
+    if dmg > lastDamage + DAMAGE_EPSILON then
+        for prisoner, _ in pairs(nearby("Prisoner", ZAP_REACH)) do
+            if prisoner ~= nil and prisoner.StatusEffects ~= nil then
+                prisoner.StatusEffects.tazed = STUN
+            end
+        end
+    end
+    if dmg > 0 then
+        this.Damage = 0
+    end
+    lastDamage = 0
 end
 
 local function servoWantsOpen()
@@ -163,6 +191,8 @@ local function isBroken()
 end
 
 function Update(timePassed)
+    shockAttackers()
+
     local still = holdStill()
 
     if isBroken() then
