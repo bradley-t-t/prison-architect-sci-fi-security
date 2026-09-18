@@ -1,4 +1,4 @@
 Name                 "Sci-Fi Security"
 Author               Trenton
 Description          "Laser fences and laser doors. Three fence styles, each in red or blue beams over grass, dirt, stone or sand, that connect to walls and to each other like any other fence. Single and double Laser Doors in red or blue, opened from a Laser Door Panel while a guard stands at it or by a triggered Door Servo, so prisoners cannot pass on their own."
-Version              1.1
+Version              1.2

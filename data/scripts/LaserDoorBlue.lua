@@ -31,12 +31,23 @@
 --
 -- Every read of a property on this is a call into the engine, and a prison
 -- can hold hundreds of these doors each updated every tick, so the script
--- reads as little as it can. A tick that changes nothing reads the damage
--- and the openness and nothing else.
+-- does as little as it can, three ways:
+--   It works in steps of STEP seconds. A tick inside a step adds up the time
+--   and returns, so at sixty frames a second two ticks in three cost nothing.
+--   A step that changes nothing reads the damage and the openness only.
+--   Looking around the door for servos and panels is a search of the map,
+--   the dearest thing a script can ask for. Neither ever moves, so they are
+--   looked for once every FIND_EVERY seconds and remembered, and between
+--   looks the door reads the remembered servo's trigger and the remembered
+--   panel's own light, which the panel's script sets while a guard stands at
+--   it. A door with neither, which is nearly all of them, reads nothing.
+--   Each door starts its timers at a random point, so hundreds of doors
+--   built together do not all look around on the same tick.
 
+local STEP = 0.05
 local SCAN_INTERVAL = 0.2
+local FIND_EVERY = 4
 local PANEL_REACH = 3.5
-local PANEL_GUARD_REACH = 1.6
 local SERVO_REACH = 1.0
 local PULSE_INTERVAL = 0.12
 local PULSE_FRAMES = 3
@@ -61,10 +72,15 @@ local DAMAGE_EPSILON = 0.001
 -- again. Once it has been seen at zero it is only looked at this often.
 local HOLD_RECHECK = 0.5
 
-local GUARDS = { "Guard", "ArmedGuard", "RiotGuard", "Sniper", "DogHandler" }
-
 local remoteOpen = false
-local scanTimer = SCAN_INTERVAL
+local stepTimer = math.random() * STEP
+local scanTimer = math.random() * SCAN_INTERVAL
+-- The servos and panels last found by the door, and when to look again. The
+-- first look is on the first step.
+local servos = {}
+local panels = {}
+local findTimer = FIND_EVERY
+local findAfter = FIND_EVERY
 local pulseTimer = 0
 local settleTimer = 0
 local frame = -1
@@ -105,10 +121,23 @@ local function shockAttackers()
     return dmg
 end
 
-local function servoWantsOpen()
+local function lookAround()
+    servos, panels = {}, {}
     for servo, _ in pairs(nearby("Servo", SERVO_REACH)) do
-        if servo ~= nil and servo.Triggered ~= nil then
-            local triggered = (tonumber(servo.Triggered) or 0) > 0
+        servos[#servos + 1] = servo
+    end
+    for panel, _ in pairs(nearby("LaserDoorPanel", PANEL_REACH)) do
+        panels[#panels + 1] = panel
+    end
+    -- the next look is a little early or late, so doors drift apart
+    findAfter = FIND_EVERY * (0.75 + 0.5 * math.random())
+end
+
+local function servoWantsOpen()
+    for _, servo in ipairs(servos) do
+        local state = servo.Triggered
+        if state ~= nil then
+            local triggered = (tonumber(state) or 0) > 0
             if not servo.OpenOnTrigger then
                 triggered = not triggered
             end
@@ -120,20 +149,11 @@ local function servoWantsOpen()
     return false
 end
 
+-- A panel shows frame 1 or 2 for as long as a guard stands at it.
 local function guardAtPanel()
-    local panels = nearby("LaserDoorPanel", PANEL_REACH)
-    if next(panels) == nil then
-        return false
-    end
-    for _, kind in ipairs(GUARDS) do
-        for guard, _ in pairs(nearby(kind, PANEL_REACH + PANEL_GUARD_REACH)) do
-            for panel, _ in pairs(panels) do
-                if guard ~= nil and panel ~= nil and guard.Pos ~= nil and panel.Pos ~= nil
-                    and math.abs(guard.Pos.x - panel.Pos.x) <= PANEL_GUARD_REACH
-                    and math.abs(guard.Pos.y - panel.Pos.y) <= PANEL_GUARD_REACH then
-                    return true
-                end
-            end
+    for _, panel in ipairs(panels) do
+        if (tonumber(panel.SubType) or 0) >= 1 then
+            return true
         end
     end
     return false
@@ -213,7 +233,14 @@ function Create()
     showFrame(0)
 end
 
-function Update(timePassed)
+function Update(tick)
+    stepTimer = stepTimer + tick
+    if stepTimer < STEP then
+        return
+    end
+    local timePassed = stepTimer
+    stepTimer = 0
+
     local damage = shockAttackers()
 
     local still = holdStill(timePassed)
@@ -232,6 +259,11 @@ function Update(timePassed)
     end
 
     scanTimer = scanTimer + timePassed
+    findTimer = findTimer + timePassed
+    if findTimer >= findAfter then
+        findTimer = 0
+        lookAround()
+    end
     if scanTimer >= SCAN_INTERVAL then
         scanTimer = 0
         local open = servoWantsOpen() or guardAtPanel()

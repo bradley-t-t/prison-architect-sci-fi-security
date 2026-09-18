@@ -9,7 +9,7 @@ local BLINK_INTERVAL = 0.4
 
 local GUARDS = { "Guard", "ArmedGuard", "RiotGuard", "Sniper", "DogHandler" }
 
-local scanTimer = SCAN_INTERVAL
+local scanTimer = math.random() * SCAN_INTERVAL
 local blinkTimer = 0
 local guardHere = false
 local frame = -1
