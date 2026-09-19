@@ -54,5 +54,9 @@ tooltip_LaserDoor_Sealed                    Sealed against a misbehaving prisone
 object_AILaserController                    AI Laser Controller
 buildtoolbar_popup_obj_AILaserController    Build one anywhere in the prison and every Laser Door becomes automatic: it opens for staff and for prisoners going about their day and shuts behind them, with no guard needed. A door seals itself the moment a misbehaving prisoner is beside it. One controller runs every door on the map.
 tooltip_AILaserController                   Running every Laser Door in the prison.
+object_LaserDoorWireBox                     Laser Door Wire Box
+buildtoolbar_popup_obj_LaserDoorWireBox     Build it on a Laser Door to wire the door up. It works as a Door Servo does: use the Connect tool to connect a Door Control System, a pressure pad or a door timer to it, and the door opens when it is triggered. It needs power.
+tooltip_LaserDoorWireBox                    Wired to the Laser Door it sits on.
+tooltip_LaserDoorWireBox_NoServo            Its servo is gone. Build the box again.
 quickbuild_LaserCellBlock                   Laser Cell Block (500 cells)
 quickbuild_LaserCellWing                    Laser Cell Wing (20 cells)

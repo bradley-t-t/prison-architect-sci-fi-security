@@ -8,6 +8,12 @@ A Prison Architect mod. It adds laser fences and laser doors.
 - Single and double Laser Doors in red or blue. A door opens from a Laser Door
   Panel while a guard stands at it, or from a triggered Door Servo, so
   prisoners cannot pass on their own.
+- The Laser Door Wire Box. Build it on a Laser Door and connect a Door Control
+  System, a pressure pad or a door timer to it with the Connect tool, as you
+  would a Door Servo. Those can only be connected to the game's own servo, so
+  the box brings one in underneath itself and covers it: the servo does the
+  work and the box is what you see. A box that is dismantled uncovers its
+  servo, which is dismantled like any other.
 - Meals at the door. A prisoner locked in a cell behind a Laser Door, on
   lockdown or in solitary, is fed through it: the door calls a guard, the
   guard stands at the door for a few seconds, and the prisoner is fed
@@ -38,7 +44,7 @@ game's mod folder, then enable it under Extras, Mods.
 | Path | Holds |
 | :--- | :--- |
 | `manifest.txt` | The name, description and version the mod screen shows |
-| `data/materials.txt` | The fence materials, the doors, the Laser Door Panel and the AI Laser Controller |
+| `data/materials.txt` | The fence materials, the doors, the Laser Door Panel, the AI Laser Controller and the Laser Door Wire Box |
 | `data/tilesetpadded.png` | The game's tileset with the fence tiles added |
 | `data/sprites.png` | The door, panel and controller sprites |
 | `data/scripts/` | One Lua script per door, the panel and the controller |

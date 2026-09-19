@@ -162,6 +162,8 @@ PANEL_STRIDE = 8
 # It never rotates, so each frame is one picture two cells wide.
 CONTROLLER_FRAMES = 2
 CONTROLLER_X0 = PANEL_STRIDE * 3
+# The Laser Door Wire Box is one picture, past the controller's frames.
+WIRE_BOX_X0 = CONTROLLER_X0 + 2 * CONTROLLER_FRAMES
 SHEET_CELLS = (156, 38)
 
 
@@ -662,6 +664,28 @@ def controller_sprite(frame=0):
     return im
 
 
+def wire_box_sprite():
+    """A small junction box seen from above, centred in its tile and wide
+    enough to cover the Door Servo underneath it whichever way that faces:
+    a dark lid, a blue lamp, and a cable leaving each side."""
+    im = Image.new("RGBA", (TILE, TILE), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    d.rectangle([2, 30, 12, 33], fill=(30, 33, 38, 255))
+    d.rectangle([51, 30, 61, 33], fill=(30, 33, 38, 255))
+    d.rectangle([13, 15, 52, 52], fill=(0, 0, 0, 90))
+    d.rectangle([12, 12, 51, 49], fill=DARK + (255,))
+    d.rectangle([12, 12, 51, 14], fill=DARK_HI + (255,))
+    d.rectangle([12, 12, 14, 49], fill=DARK_HI + (255,))
+    d.rectangle([49, 12, 51, 49], fill=(30, 33, 38, 255))
+    d.rectangle([12, 47, 51, 49], fill=(30, 33, 38, 255))
+    for x, y in ((16, 16), (45, 16), (16, 43), (45, 43)):
+        d.rectangle([x, y, x + 2, y + 2], fill=(30, 33, 38, 255))
+    d.ellipse([26, 25, 37, 36], fill=(22, 78, 190, 255))
+    d.ellipse([28, 27, 35, 34], fill=(72, 165, 255, 255))
+    d.rectangle([30, 28, 32, 30], fill=(205, 235, 255, 255))
+    return im
+
+
 # ---------------------------------------------------------------- tileset
 
 def padded(tile):
@@ -920,6 +944,27 @@ END
     BEGIN ToolbarSprite  x {CONTROLLER_X0}  y {PANEL_BAND}  w 2  h 2  END
 {controller_sprites}END
 """)
+    # Like the game's Door Servo it names no group and is blocked by nothing,
+    # which is what lets it be built on a door. It draws above the servo.
+    out.append(f"""BEGIN Object
+    Name                 LaserDoorWireBox
+    Width                1
+    Height               1
+    ConstructionTime     10.0000
+    Toughness            100.000
+    Price                -200
+    Filter               Security
+    RenderDepth          4
+    AttachToWall         false
+    MadeOf               Composite
+    Properties           StaticObject
+    Properties           Scripted
+    Research             RemoteAccess
+    NumSprites           1
+    BEGIN ToolbarSprite  x {WIRE_BOX_X0}  y {PANEL_BAND}  w 2  h 2  END
+    BEGIN Sprite         x {WIRE_BOX_X0}  y {PANEL_BAND}  w 2  h 2  RotateType 0  TopAligned false  END
+END
+""")
     return "\n".join(out)
 
 
@@ -961,6 +1006,10 @@ def language_text():
         f"{'object_AILaserController':<43} AI Laser Controller",
         f"{'buildtoolbar_popup_obj_AILaserController':<43} Build one anywhere in the prison and every Laser Door becomes automatic: it opens for staff and for prisoners going about their day and shuts behind them, with no guard needed. A door seals itself the moment a misbehaving prisoner is beside it. One controller runs every door on the map.",
         f"{'tooltip_AILaserController':<43} Running every Laser Door in the prison.",
+        f"{'object_LaserDoorWireBox':<43} Laser Door Wire Box",
+        f"{'buildtoolbar_popup_obj_LaserDoorWireBox':<43} Build it on a Laser Door to wire the door up. It works as a Door Servo does: use the Connect tool to connect a Door Control System, a pressure pad or a door timer to it, and the door opens when it is triggered. It needs power.",
+        f"{'tooltip_LaserDoorWireBox':<43} Wired to the Laser Door it sits on.",
+        f"{'tooltip_LaserDoorWireBox_NoServo':<43} Its servo is gone. Build the box again.",
     ]
     for name, label, per_row, units in PREFABS:
         lines.append(f"{'quickbuild_' + name:<43} {label} ({per_row * 2 * units} cells)")
@@ -990,6 +1039,8 @@ def write_text_files(placements, data_dir):
     shutil.copyfile(os.path.join(TOOLS, "LaserDoorPanel.lua"), os.path.join(data_dir, "scripts", "LaserDoorPanel.lua"))
     shutil.copyfile(os.path.join(TOOLS, "AILaserController.lua"),
                     os.path.join(data_dir, "scripts", "AILaserController.lua"))
+    shutil.copyfile(os.path.join(TOOLS, "LaserDoorWireBox.lua"),
+                    os.path.join(data_dir, "scripts", "LaserDoorWireBox.lua"))
 
 
 # ---------------------------------------------------------------- output
@@ -1018,6 +1069,7 @@ def build_sprites():
         sheet.paste(base.transpose(Image.ROTATE_90), ((x0 + 6) * 32, PANEL_BAND * 32))
     for f in range(CONTROLLER_FRAMES):
         sheet.paste(controller_sprite(f), ((CONTROLLER_X0 + 2 * f) * 32, PANEL_BAND * 32))
+    sheet.paste(wire_box_sprite(), (WIRE_BOX_X0 * 32, PANEL_BAND * 32))
     return sheet
 
 
