@@ -99,6 +99,7 @@ local RARE_STAFF_KINDS = { "Orderly", "Farmer", "Foreman", "Warden", "Chief", "P
 local RARE_EVERY = 3
 local STAFF_REACH = 1.5         -- tiles from the door's middle
 local STAFF_EVERY = 0.4         -- seconds between looks
+local STAFF_RELOOK = 1.0        -- seconds to the next look once staff have been seen
 local STAFF_HOLD = 1.6          -- seconds the door stays open after staff were last seen at it
 local THREAT_EVERY = 0.6        -- seconds between looks for trouble while the door is open
 local LOCKOUT = 4
@@ -123,6 +124,7 @@ local SETTLE = 0.3
 local ZAP_REACH = 1.5
 local STUN = 60
 local DAMAGE_EPSILON = 0.001
+local ZAP_EVERY = 1.5           -- seconds between two shocks from one door
 -- The engine works out OpenDir once, when it initialises the door, and never
 -- again. Once it has been seen at zero it is only looked at this often.
 local HOLD_RECHECK = 0.5
@@ -176,6 +178,7 @@ local frame = -1
 local lastRaw = 0
 local wasOpen = false
 local lastDamage = 0
+local zapWait = 0
 local held = false
 local holdTimer = 0
 
@@ -190,12 +193,21 @@ local function nearby(kind, range)
     return Object.GetNearbyObjects(kind, range) or {}
 end
 
-local function shockAttackers()
+local function shockAttackers(timePassed)
     -- Damage only rises when something is hitting the door. When it does, taze
     -- every prisoner against the door, then wipe the damage so it never breaks.
     -- Returns the damage the door is left with, read back only after a wipe.
+    -- A door under attack is damaged on every step, and a search for the
+    -- prisoners at it on every one of those was, measured, the dearest thing
+    -- the doors of a rioting prison did. Whoever a shock drops stays down for
+    -- a minute, so one shock every ZAP_EVERY loses nothing; the damage is
+    -- still wiped on every step.
     local dmg = tonumber(this.Damage) or 0
-    if dmg > lastDamage + DAMAGE_EPSILON then
+    if zapWait > 0 then
+        zapWait = zapWait - timePassed
+    end
+    if dmg > lastDamage + DAMAGE_EPSILON and zapWait <= 0 then
+        zapWait = ZAP_EVERY
         for prisoner, _ in pairs(nearby("Prisoner", ZAP_REACH)) do
             if prisoner ~= nil and prisoner.StatusEffects ~= nil then
                 prisoner.StatusEffects.tazed = STUN
@@ -481,7 +493,7 @@ function Update(tick)
     local timePassed = stepTimer
     stepTimer = 0
 
-    local damage = shockAttackers()
+    local damage = shockAttackers(timePassed)
 
     local still = holdStill(timePassed)
 
@@ -512,6 +524,8 @@ function Update(tick)
         staffTimer = 0
         if staffAtDoor() then
             staffHold = STAFF_HOLD
+            -- someone is here and the door is held: the next look can wait
+            staffTimer = STAFF_EVERY - STAFF_RELOOK
         end
     end
     if scanTimer >= SCAN_INTERVAL then
