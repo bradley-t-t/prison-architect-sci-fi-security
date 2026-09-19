@@ -10,7 +10,7 @@ Outputs, relative to the mod root (the parent of this tools/ folder):
   data/jobs.txt                the door's own job, a guard passing a meal through it
   data/prefabs.txt             the Laser Cell Block quick build
   data/sprites.png             door and panel sprites
-  thumbnail.png                the mod's card image in the game's mod list
+  tools/card-art.png           the art on the mod's Workshop card; thumbnail.png is exported from Figma
   tools/preview.png            every fence cell, the doors and the panel
 
 Usage: python gen_assets.py <path to the game's original tilesetpadded.png>
@@ -27,7 +27,6 @@ import sys
 
 from PIL import Image, ImageDraw
 
-import card
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
@@ -1151,7 +1150,6 @@ def main():
     write_text_files(placements, DATA)
     build_sprites().save(os.path.join(DATA, "sprites.png"))
     build_thumbnail().save(os.path.join(ROOT, "tools", "card-art.png"))
-    card.build(ROOT)
     build_preview().save(os.path.join(TOOLS, "preview.png"))
     print(f"wrote {len(placements)} fence materials, {len(DOORS)} doors, tileset {ts.size[0]}x{ts.size[1]}, sprites, thumbnail, preview")
 
