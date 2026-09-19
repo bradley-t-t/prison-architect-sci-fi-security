@@ -7,6 +7,7 @@ Outputs, relative to the mod root (the parent of this tools/ folder):
                                doors and the panel
   data/language/base-language.txt   names and build-menu text
   data/scripts/LaserDoor*.lua  one copy of the door script per door object
+  data/jobs.txt                the door's own job, a guard passing a meal through it
   data/prefabs.txt             the Laser Cell Block quick build
   data/sprites.png             door and panel sprites
   thumbnail.png                the mod's card image in the game's mod list
@@ -922,6 +923,20 @@ END
     return "\n".join(out)
 
 
+def jobs_text():
+    """The door's own job: a guard stands at the door for a few seconds to
+    pass a meal through it. The door's script raises it and is told when it
+    is done."""
+    return """BEGIN Job
+    Name                 LaserDoorMeal
+    JobTime              4
+    Worker               Guard
+    Worker               ArmedGuard
+    Properties           HighPriority
+END
+"""
+
+
 def language_text():
     lines = []
     for fence in fence_defs():
@@ -940,6 +955,7 @@ def language_text():
         f"{'tooltip_LaserDoorPanel_Active':<43} Guard at the panel. Laser Doors within reach are open.",
         f"{'tooltip_LaserDoor_Shut':<43} Sealed. Staff with keys open it; a guard at a Laser Door Panel or a triggered Door Servo opens it from a distance.",
         f"{'tooltip_LaserDoor_Open':<43} Open.",
+        f"{'job_custom_LaserDoorMeal':<43} Pass a meal through the laser door",
         f"{'tooltip_LaserDoor_Auto':<43} Automatic. The AI Laser Controller opens it for whoever is allowed through and shuts it behind them.",
         f"{'tooltip_LaserDoor_Sealed':<43} Sealed against a misbehaving prisoner. Staff with keys can still open it.",
         f"{'object_AILaserController':<43} AI Laser Controller",
@@ -960,6 +976,8 @@ def write_text_files(placements, data_dir):
         f.write(language_text())
     with open(os.path.join(data_dir, "prefabs.txt"), "w", encoding="utf-8", newline="\n") as f:
         f.write(prefabs_text())
+    with open(os.path.join(data_dir, "jobs.txt"), "w", encoding="utf-8", newline="\n") as f:
+        f.write(jobs_text())
     # The game finds an object's script by the object's name, so every door
     # object gets its own copy of the one door script.
     with open(os.path.join(TOOLS, "LaserDoor.lua"), encoding="utf-8") as f:

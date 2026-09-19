@@ -8,6 +8,12 @@ A Prison Architect mod. It adds laser fences and laser doors.
 - Single and double Laser Doors in red or blue. A door opens from a Laser Door
   Panel while a guard stands at it, or from a triggered Door Servo, so
   prisoners cannot pass on their own.
+- Meals at the door. A prisoner locked in a cell behind a Laser Door, on
+  lockdown or in solitary, is fed through it: the door calls a guard, the
+  guard stands at the door for a few seconds, and the prisoner is fed
+  without the guard going inside. The game does this only for its own
+  Solitary Door, so the laser door does it itself, and asks early enough
+  that the game's own feeding job, the one that walks in, is never raised.
 - The AI Laser Controller. Build one anywhere in the prison and every Laser
   Door becomes automatic, with no guard needed: a door opens for staff and
   for prisoners going about their day and shuts behind them. The game only
@@ -37,6 +43,7 @@ game's mod folder, then enable it under Extras, Mods.
 | `data/sprites.png` | The door, panel and controller sprites |
 | `data/scripts/` | One Lua script per door, the panel and the controller |
 | `data/prefabs.txt` | The Quick Build prefabs |
+| `data/jobs.txt` | The door's own job: a guard passing a meal through it |
 | `data/language/base-language.txt` | The names and tooltips the game shows |
 | `tools/gen_assets.py` | Builds `data/` from scratch: the tileset, the sprite sheet, `materials.txt`, the prefabs and the door scripts |
 | `tools/LaserDoor.lua` | The door script every door's copy is generated from |

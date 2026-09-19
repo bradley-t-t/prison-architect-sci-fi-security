@@ -16,6 +16,18 @@
 -- staff with keys can still open. With no controller on the map the door is
 -- the locked door it always was.
 --
+-- Meals come to the door. The game passes a meal through a door only for
+-- its own Solitary Door, by name, and for any other door its guard walks
+-- into the cell. So a laser door on a cell feeds its own prisoners. Every few
+-- seconds it looks at the prisoners of its cell, and if one is locked in (a
+-- lockdown or solitary punishment) and getting hungry it raises a job of its
+-- own, LaserDoorMeal, which a guard works standing at the door. When that
+-- job is done the door feeds every locked-in prisoner of the cell, and the
+-- guard never goes inside. It asks at FOOD_AT, below the hunger at which the
+-- game raises its own feeding job, so the game's job, the one that walks in,
+-- is not raised at all. A door that is not on a cell reads one property and
+-- does none of it.
+--
 -- The engine draws a door at its position plus OpenDir times its openness,
 -- which is how its own doors slide into the wall. A laser door's frame must
 -- not move, so the script holds OpenDir at zero and the sprite stays in the
@@ -94,6 +106,17 @@ local DAMAGE_EPSILON = 0.001
 -- again. Once it has been seen at zero it is only looked at this often.
 local HOLD_RECHECK = 0.5
 
+-- Meals at the door: how often a cell's door looks at its prisoners, how far
+-- into the cell it looks, the hunger (0 to 100) at which it calls a guard,
+-- how long it waits for one before asking again, and how long after a meal
+-- it will not ask at all when hunger cannot be read.
+local MEAL_JOB = "LaserDoorMeal"
+local MEAL_CHECK_EVERY = 4
+local CELL_REACH = 7
+local FOOD_AT = 45
+local MEAL_GIVE_UP = 180
+local MEAL_GAP = 480
+
 local remoteOpen = false
 local stepTimer = math.random() * STEP
 local scanTimer = math.random() * SCAN_INTERVAL
@@ -110,6 +133,13 @@ local controlTimer = CONTROL_FIND_EVERY
 local controlAfter = CONTROL_FIND_EVERY
 local lockout = 0
 local threatTimer = 0
+-- The meal job: whether one is out, how long it has been, and when this
+-- door last fed anyone.
+local mealTimer = math.random() * MEAL_CHECK_EVERY
+local mealOut = false
+local mealWait = 0
+local clock = 0
+local lastMeal = -MEAL_GAP
 local pulseTimer = 0
 local settleTimer = 0
 local frame = -1
@@ -264,6 +294,60 @@ local function watchForTrouble(timePassed, raw)
     return true
 end
 
+-- The prisoners of this door's cell who are locked in, and whether any of
+-- them is hungry enough to call a guard for. A prisoner the game is already
+-- feeding is left to the game.
+local function lockedIn()
+    local cell = this.CellId
+    local cellId = cell ~= nil and tonumber(cell.i) or nil
+    if cellId == nil or cellId < 0 then
+        return nil, false
+    end
+    local list, hungry = {}, false
+    for prisoner, _ in pairs(nearby("Prisoner", CELL_REACH)) do
+        local home = prisoner.Cell
+        if home ~= nil and tonumber(home.i) == cellId and prisoner.Locked == true
+            and (tonumber(prisoner.FeedJobId) or -1) < 0 then
+            list[#list + 1] = prisoner
+            local food = tonumber(Object.GetProperty(prisoner, "Needs.Food"))
+            if food ~= nil then
+                hungry = hungry or food >= FOOD_AT
+            else
+                hungry = hungry or clock - lastMeal >= MEAL_GAP
+            end
+        end
+    end
+    return list, hungry
+end
+
+local function watchMeals(timePassed)
+    if mealOut then
+        mealWait = mealWait + timePassed
+        if mealWait >= MEAL_GIVE_UP then
+            -- nobody came: withdraw it and ask afresh at the next look
+            this.CancelJob(MEAL_JOB)
+            mealOut = false
+        end
+        return
+    end
+    local list, hungry = lockedIn()
+    if list ~= nil and hungry then
+        this.CreateJob(MEAL_JOB)
+        mealOut = true
+        mealWait = 0
+    end
+end
+
+-- The game calls this when a guard has finished the meal job at the door.
+function JobComplete_LaserDoorMeal()
+    mealOut = false
+    lastMeal = clock
+    local list = lockedIn()
+    for _, prisoner in ipairs(list or {}) do
+        Object.SetProperty(prisoner, "Needs.Food", 0)
+    end
+end
+
 local function holdStill(timePassed)
     -- True once the engine has no slide left to apply to this door. Between
     -- rechecks the last answer stands.
@@ -376,6 +460,14 @@ function Update(tick)
             remoteOpen = open
             showTooltip()
         end
+    end
+
+    clock = clock + timePassed
+    mealTimer = mealTimer + timePassed
+    if mealTimer >= MEAL_CHECK_EVERY then
+        local waited = mealTimer
+        mealTimer = 0
+        watchMeals(waited)
     end
 
     controlTimer = controlTimer + timePassed

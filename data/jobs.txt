@@ -1,0 +1,7 @@
+BEGIN Job
+    Name                 LaserDoorMeal
+    JobTime              4
+    Worker               Guard
+    Worker               ArmedGuard
+    Properties           HighPriority
+END
