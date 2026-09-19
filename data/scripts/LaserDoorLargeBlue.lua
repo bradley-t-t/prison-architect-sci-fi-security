@@ -80,6 +80,7 @@ local CONTROL_REACH = 5000   -- tiles; wider than any map
 -- How near a misbehaving prisoner seals an automatic door, and for how long
 -- it stays an ordinary locked door afterwards.
 local THREAT_REACH = 3
+local THREAT_EVERY = 0.6        -- seconds between looks for trouble while the door is open
 local LOCKOUT = 4
 local PANEL_REACH = 3.5
 local SERVO_REACH = 1.0
@@ -110,9 +111,15 @@ local HOLD_RECHECK = 0.5
 -- into the cell it looks, the hunger (0 to 100) at which it calls a guard,
 -- how long it waits for one before asking again, and how long after a meal
 -- it will not ask at all when hunger cannot be read.
+--
+-- A search for prisoners is the dearest thing a door does: the game builds a
+-- full script record of every prisoner it hands back, afresh every time, and
+-- measured in a prison of a hundred cells those searches were half of all the
+-- time the game spent. So a door looks into its cell twice a minute, and only
+-- as far as a cell is deep.
 local MEAL_JOB = "LaserDoorMeal"
-local MEAL_CHECK_EVERY = 4
-local CELL_REACH = 7
+local MEAL_CHECK_EVERY = 30
+local CELL_REACH = 4
 local FOOD_AT = 45
 local MEAL_GIVE_UP = 180
 local MEAL_GAP = 480
@@ -276,11 +283,11 @@ local function watchForTrouble(timePassed, raw)
         return false
     end
     if raw <= SHUT then
-        threatTimer = SCAN_INTERVAL   -- look the moment it next starts to open
+        threatTimer = THREAT_EVERY    -- look the moment it next starts to open
         return false
     end
     threatTimer = threatTimer + timePassed
-    if threatTimer < SCAN_INTERVAL then
+    if threatTimer < THREAT_EVERY then
         return false
     end
     threatTimer = 0
