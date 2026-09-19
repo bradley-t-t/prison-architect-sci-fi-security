@@ -22,11 +22,27 @@ local function showFrame(n)
     end
 end
 
+-- A look asks for one kind of guard, and the kinds take turns. A guard posted
+-- at the panel stands there, so he is found within a few looks, and after
+-- that the panel asks for his kind alone until he has gone.
+local guardKind = nil
+local kindAt = 0
+
+local function someoneOf(kind)
+    return next(Object.GetNearbyObjects(kind, GUARD_REACH) or {}) ~= nil
+end
+
 local function guardNearby()
-    for _, kind in ipairs(GUARDS) do
-        for _ in pairs(Object.GetNearbyObjects(kind, GUARD_REACH) or {}) do
+    if guardKind ~= nil then
+        if someoneOf(guardKind) then
             return true
         end
+        guardKind = nil
+    end
+    kindAt = kindAt % #GUARDS + 1
+    if someoneOf(GUARDS[kindAt]) then
+        guardKind = GUARDS[kindAt]
+        return true
     end
     return false
 end

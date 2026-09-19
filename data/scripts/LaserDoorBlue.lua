@@ -66,7 +66,7 @@
 -- can hold hundreds of these doors each updated every tick, so the script
 -- does as little as it can, three ways:
 --   It works in steps of STEP seconds. A tick inside a step adds up the time
---   and returns, so at sixty frames a second two ticks in three cost nothing.
+--   and returns, so at sixty frames a second five ticks in six cost nothing.
 --   A step that changes nothing reads the damage and the openness only.
 --   Looking around the door for servos and panels is a search of the map,
 --   the dearest thing a script can ask for. Neither ever moves, so they are
@@ -80,9 +80,9 @@
 --   Each door starts its timers at a random point, so hundreds of doors
 --   built together do not all look around on the same tick.
 
-local STEP = 0.05
+local STEP = 0.1
 local SCAN_INTERVAL = 0.2
-local FIND_EVERY = 4
+local FIND_EVERY = 8
 local CONTROLLER = "AILaserController"
 local CONTROL_FIND_EVERY = 10
 local CONTROL_REACH = 5000   -- tiles; wider than any map
@@ -90,22 +90,28 @@ local CONTROL_REACH = 5000   -- tiles; wider than any map
 -- it stays an ordinary locked door afterwards.
 local THREAT_REACH = 3
 
--- Staff at the door. The kinds are in the order a door is likeliest to meet
--- them, and the look stops at the first one found. A search costs by what it
--- hands back, and at this reach that is nobody or one person, so looking
--- this often is cheap where looking across a cell was not.
-local STAFF_KINDS = { "Guard", "Workman", "Cook", "Janitor", "ArmedGuard", "DogHandler", "Doctor", "Gardener" }
--- The kinds a door seldom meets are looked for one look in three.
+-- Staff at the door. The game opens a locked door for anyone carrying keys,
+-- so the door looks only for the staff who carry none. A search is a call
+-- into the engine whatever it finds, and a prison holds hundreds of doors, so
+-- a look asks for one kind of person and the kinds take turns: the kinds a
+-- door is likeliest to meet, with one of the kinds it seldom meets every
+-- RARE_EVERY looks. Staff without keys stand at a locked door and wait, so
+-- the door finds them within a few looks. Once it has, it asks for that kind
+-- alone until they have gone.
+local STAFF_KINDS = { "Workman", "Cook", "Janitor", "Doctor", "Gardener" }
 local RARE_STAFF_KINDS = { "Orderly", "Farmer", "Foreman", "Warden", "Chief", "Psychologist", "Psychiatrist",
-                           "Accountant", "Lawyer", "Teacher", "SpiritualLeader", "Paramedic", "Fireman",
-                           "RiotGuard", "Sniper", "Soldier" }
+                           "Accountant", "Lawyer", "Teacher", "SpiritualLeader", "Paramedic", "Fireman" }
 local RARE_EVERY = 3
 local STAFF_REACH = 1.5         -- tiles from the door's middle
-local STAFF_EVERY = 0.4         -- seconds between looks
+local STAFF_EVERY = 0.3         -- seconds between looks
 local STAFF_RELOOK = 1.0        -- seconds to the next look once staff have been seen
 local STAFF_HOLD = 1.6          -- seconds the door stays open after staff were last seen at it
 local THREAT_EVERY = 0.6        -- seconds between looks for trouble while the door is open
 local LOCKOUT = 4
+-- The engine shuts a door it opened itself and no other. A door found standing
+-- open with nothing of the script's holding it is shut after this long; if the
+-- engine has someone in the doorway it opens again at once.
+local STUCK_AFTER = 10
 local PANEL_REACH = 3.5
 local SERVO_REACH = 1.0
 local PULSE_INTERVAL = 0.12
@@ -174,6 +180,11 @@ local mealTimer = math.random() * MEAL_CHECK_EVERY
 local staffTimer = math.random() * STAFF_EVERY
 local staffHold = 0
 local staffLooks = 0
+local staffKind = nil           -- the kind of staff last seen at the door
+local commonAt = 0
+local rareAt = 0
+local forced = false            -- the script, not the engine, has the door open
+local openFor = 0
 local mealOut = false
 local mealWait = 0
 local clock = 0
@@ -270,23 +281,36 @@ end
 
 -- True while a living member of staff stands at the door. A body at a door
 -- holds nothing open.
-local function anyOf(kinds)
-    for _, kind in ipairs(kinds) do
-        for member in pairs(nearby(kind, STAFF_REACH)) do
-            if (tonumber(member.Damage) or 0) < 1 then
-                return true
-            end
+local function someoneOf(kind)
+    for member in pairs(nearby(kind, STAFF_REACH)) do
+        if (tonumber(member.Damage) or 0) < 1 then
+            return true
         end
     end
     return false
 end
 
 local function staffAtDoor()
+    if staffKind ~= nil then
+        if someoneOf(staffKind) then
+            return true
+        end
+        staffKind = nil
+    end
     staffLooks = staffLooks + 1
-    if anyOf(STAFF_KINDS) then
+    local kind
+    if staffLooks % RARE_EVERY == 0 then
+        rareAt = rareAt % #RARE_STAFF_KINDS + 1
+        kind = RARE_STAFF_KINDS[rareAt]
+    else
+        commonAt = commonAt % #STAFF_KINDS + 1
+        kind = STAFF_KINDS[commonAt]
+    end
+    if someoneOf(kind) then
+        staffKind = kind
         return true
     end
-    return staffLooks % RARE_EVERY == 0 and anyOf(RARE_STAFF_KINDS)
+    return false
 end
 
 local function showTooltip()
@@ -589,6 +613,19 @@ function Update(tick)
     local openness = raw
     if remoteOpen then
         openness = 1
+        forced = true
+        openFor = 0
+    elseif forced then
+        -- whatever held it open has gone, and the engine will not shut a
+        -- door it did not open
+        forced = false
+        openness = 0
+    elseif raw >= OPENED then
+        openFor = openFor + timePassed
+        if openFor >= STUCK_AFTER then
+            openFor = 0
+            openness = 0
+        end
     elseif raw > SHUT and raw < OPENED then
         -- part-way: the engine is animating. Snap in the direction it is going.
         if raw >= lastRaw then
@@ -597,7 +634,10 @@ function Update(tick)
             openness = 0
         end
     end
-    lastRaw = raw
+    if raw < OPENED then
+        openFor = 0
+    end
+    lastRaw = openness
     if openness ~= raw then
         this.Open = openness
     end
