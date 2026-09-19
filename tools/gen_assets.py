@@ -27,6 +27,8 @@ import sys
 
 from PIL import Image, ImageDraw
 
+import card
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 TOOLS = os.path.join(ROOT, "tools")
@@ -1148,7 +1150,8 @@ def main():
     ts.save(os.path.join(DATA, "tilesetpadded.png"), optimize=True)
     write_text_files(placements, DATA)
     build_sprites().save(os.path.join(DATA, "sprites.png"))
-    build_thumbnail().save(os.path.join(ROOT, "thumbnail.png"))
+    build_thumbnail().save(os.path.join(ROOT, "tools", "card-art.png"))
+    card.build(ROOT)
     build_preview().save(os.path.join(TOOLS, "preview.png"))
     print(f"wrote {len(placements)} fence materials, {len(DOORS)} doors, tileset {ts.size[0]}x{ts.size[1]}, sprites, thumbnail, preview")
 
