@@ -150,6 +150,9 @@ OPEN_SLIDE_EXTRA = {1: -6, 2: -12}
 # opens within one script update, so the renderer's catch-up slide would
 # otherwise show; the large door takes several updates and needs none.
 SETTLE_SECONDS = {1: 0.3, 2: 0.0}
+# How far from its middle a door looks for staff: a double door's middle is
+# half a tile further from whoever stands at one of its ends.
+STAFF_REACH = {1: 1.5, 2: 2.0}
 # Every frame has its own canvas, and the canvas is also the door's hit box,
 # so a frame is only as large as it has to be. Sealed and rest frames are
 # exactly the door. The flat open frames hold the frame shifted one slide to
@@ -998,7 +1001,7 @@ def language_text():
         f"{'buildtoolbar_popup_obj_LaserDoorPanel':<43} Build it within three tiles of a Laser Door. While a guard stands next to the panel, every Laser Door within reach opens, so a guard can let people through without going to the door.",
         f"{'tooltip_LaserDoorPanel_Idle':<43} No guard at the panel.",
         f"{'tooltip_LaserDoorPanel_Active':<43} Guard at the panel. Laser Doors within reach are open.",
-        f"{'tooltip_LaserDoor_Shut':<43} Sealed. Staff with keys open it; a guard at a Laser Door Panel or a triggered Door Servo opens it from a distance.",
+        f"{'tooltip_LaserDoor_Shut':<43} Sealed. It opens for any member of staff who walks up to it and never for a prisoner; a guard at a Laser Door Panel or a triggered Door Servo opens it from a distance.",
         f"{'tooltip_LaserDoor_Open':<43} Open.",
         f"{'job_custom_LaserDoorMeal':<43} Pass a meal through the laser door",
         f"{'tooltip_LaserDoor_Auto':<43} Automatic. The AI Laser Controller opens it for whoever is allowed through and shuts it behind them.",
@@ -1034,6 +1037,8 @@ def write_text_files(placements, data_dir):
     assert "local SETTLE = 0.3\n" in door_script
     for name, _, tiles, _, _ in DOORS:
         script = door_script.replace("local SETTLE = 0.3\n", f"local SETTLE = {SETTLE_SECONDS[tiles]}\n")
+        assert "local STAFF_REACH = 1.5 " in script
+        script = script.replace("local STAFF_REACH = 1.5 ", f"local STAFF_REACH = {STAFF_REACH[tiles]} ")
         with open(os.path.join(data_dir, "scripts", name + ".lua"), "w", encoding="utf-8", newline="\n") as f:
             f.write(script)
     shutil.copyfile(os.path.join(TOOLS, "LaserDoorPanel.lua"), os.path.join(data_dir, "scripts", "LaserDoorPanel.lua"))

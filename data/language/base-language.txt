@@ -46,7 +46,7 @@ object_LaserDoorPanel                       Laser Door Panel
 buildtoolbar_popup_obj_LaserDoorPanel       Build it within three tiles of a Laser Door. While a guard stands next to the panel, every Laser Door within reach opens, so a guard can let people through without going to the door.
 tooltip_LaserDoorPanel_Idle                 No guard at the panel.
 tooltip_LaserDoorPanel_Active               Guard at the panel. Laser Doors within reach are open.
-tooltip_LaserDoor_Shut                      Sealed. Staff with keys open it; a guard at a Laser Door Panel or a triggered Door Servo opens it from a distance.
+tooltip_LaserDoor_Shut                      Sealed. It opens for any member of staff who walks up to it and never for a prisoner; a guard at a Laser Door Panel or a triggered Door Servo opens it from a distance.
 tooltip_LaserDoor_Open                      Open.
 job_custom_LaserDoorMeal                    Pass a meal through the laser door
 tooltip_LaserDoor_Auto                      Automatic. The AI Laser Controller opens it for whoever is allowed through and shuts it behind them.

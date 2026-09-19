@@ -5,9 +5,11 @@ A Prison Architect mod. It adds laser fences and laser doors.
 - Three fence styles, Laser Fence, Laser Grid and Laser Curtain, each in red or
   blue beams over grass, dirt, snow, stone, sand or concrete. They connect to
   walls and to each other like any other fence.
-- Single and double Laser Doors in red or blue. A door opens from a Laser Door
-  Panel while a guard stands at it, or from a triggered Door Servo, so
-  prisoners cannot pass on their own.
+- Single and double Laser Doors in red or blue. A door opens for any member
+  of staff who walks up to it, a cook or a workman as readily as a guard with
+  keys, and shuts behind them. It never opens for a prisoner. It also opens
+  from a Laser Door Panel while a guard stands at it, or from a triggered Door
+  Servo.
 - The Laser Door Wire Box. Build it on a Laser Door and connect a Door Control
   System, a pressure pad or a door timer to it with the Connect tool, as you
   would a Door Servo. Those can only be connected to the game's own servo, so

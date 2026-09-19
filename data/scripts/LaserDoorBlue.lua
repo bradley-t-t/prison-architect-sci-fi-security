@@ -4,6 +4,12 @@
 -- top of that the script opens it from a distance while a guard stands at a
 -- Laser Door Panel within reach or a Door Servo on the door is triggered.
 --
+-- The door also opens itself for staff. The game opens a locked door only for
+-- whoever carries keys, so a cook or a workman waits at it for a guard. The
+-- script looks for staff standing at the door a few times a second and holds
+-- it open while one is there. It looks for staff and never for prisoners, so
+-- a prisoner standing at the door opens nothing.
+--
 -- An AI Laser Controller anywhere on the map makes the door automatic. The
 -- script then asks the game to unlock it, and the game opens and shuts it
 -- for whoever walks up, staff and prisoners alike, by its own rules for an
@@ -80,6 +86,20 @@ local CONTROL_REACH = 5000   -- tiles; wider than any map
 -- How near a misbehaving prisoner seals an automatic door, and for how long
 -- it stays an ordinary locked door afterwards.
 local THREAT_REACH = 3
+
+-- Staff at the door. The kinds are in the order a door is likeliest to meet
+-- them, and the look stops at the first one found. A search costs by what it
+-- hands back, and at this reach that is nobody or one person, so looking
+-- this often is cheap where looking across a cell was not.
+local STAFF_KINDS = { "Guard", "Workman", "Cook", "Janitor", "ArmedGuard", "DogHandler", "Doctor", "Gardener" }
+-- The kinds a door seldom meets are looked for one look in three.
+local RARE_STAFF_KINDS = { "Orderly", "Farmer", "Foreman", "Warden", "Chief", "Psychologist", "Psychiatrist",
+                           "Accountant", "Lawyer", "Teacher", "SpiritualLeader", "Paramedic", "Fireman",
+                           "RiotGuard", "Sniper", "Soldier" }
+local RARE_EVERY = 3
+local STAFF_REACH = 1.5         -- tiles from the door's middle
+local STAFF_EVERY = 0.4         -- seconds between looks
+local STAFF_HOLD = 1.6          -- seconds the door stays open after staff were last seen at it
 local THREAT_EVERY = 0.6        -- seconds between looks for trouble while the door is open
 local LOCKOUT = 4
 local PANEL_REACH = 3.5
@@ -143,6 +163,9 @@ local threatTimer = 0
 -- The meal job: whether one is out, how long it has been, and when this
 -- door last fed anyone.
 local mealTimer = math.random() * MEAL_CHECK_EVERY
+local staffTimer = math.random() * STAFF_EVERY
+local staffHold = 0
+local staffLooks = 0
 local mealOut = false
 local mealWait = 0
 local clock = 0
@@ -223,6 +246,27 @@ local function guardAtPanel()
         end
     end
     return false
+end
+
+-- True while a living member of staff stands at the door. A body at a door
+-- holds nothing open.
+local function anyOf(kinds)
+    for _, kind in ipairs(kinds) do
+        for member in pairs(nearby(kind, STAFF_REACH)) do
+            if (tonumber(member.Damage) or 0) < 1 then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+local function staffAtDoor()
+    staffLooks = staffLooks + 1
+    if anyOf(STAFF_KINDS) then
+        return true
+    end
+    return staffLooks % RARE_EVERY == 0 and anyOf(RARE_STAFF_KINDS)
 end
 
 local function showTooltip()
@@ -460,9 +504,19 @@ function Update(tick)
         findTimer = 0
         lookAround()
     end
+    staffTimer = staffTimer + timePassed
+    if staffHold > 0 then
+        staffHold = staffHold - timePassed
+    end
+    if staffTimer >= STAFF_EVERY then
+        staffTimer = 0
+        if staffAtDoor() then
+            staffHold = STAFF_HOLD
+        end
+    end
     if scanTimer >= SCAN_INTERVAL then
         scanTimer = 0
-        local open = servoWantsOpen() or guardAtPanel()
+        local open = staffHold > 0 or servoWantsOpen() or guardAtPanel()
         if open ~= remoteOpen then
             remoteOpen = open
             showTooltip()
