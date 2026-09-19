@@ -22,17 +22,20 @@
 -- staff with keys can still open. With no controller on the map the door is
 -- the locked door it always was.
 --
--- Meals come to the door. The game passes a meal through a door only for
--- its own Solitary Door, by name, and for any other door its guard walks
--- into the cell. So a laser door on a cell feeds its own prisoners. Every few
--- seconds it looks at the prisoners of its cell, and if one is locked in (a
--- lockdown or solitary punishment) and getting hungry it raises a job of its
--- own, LaserDoorMeal, which a guard works standing at the door. When that
--- job is done the door feeds every locked-in prisoner of the cell, and the
--- guard never goes inside. It asks at FOOD_AT, below the hunger at which the
--- game raises its own feeding job, so the game's job, the one that walks in,
--- is not raised at all. A door that is not on a cell reads one property and
--- does none of it.
+-- Meals come to the door during a bangup, and only then. The game feeds a
+-- prisoner in his cell only while he is on a lockdown or solitary punishment,
+-- and those meals stay the game's: its guard brings them as he would through
+-- any door. A bangup holds everyone else in their cells with no meal coming
+-- at all, so that is when a laser door on a cell feeds its own prisoners.
+--
+-- A script cannot read whether a bangup is on. What it can read is what a
+-- bangup does and no hour of a regime does: a prisoner at home, on no
+-- punishment, hungry, who last ate longer ago than a night lasts. Twice a
+-- minute the door looks at the prisoners of its cell, and for one like that
+-- it raises a job of its own, LaserDoorMeal, which a guard works standing at
+-- the door. When that job is done the door feeds every such prisoner of the
+-- cell, and the guard never goes inside. A door that is not on a cell reads
+-- one property and does none of it.
 --
 -- The engine draws a door at its position plus OpenDir times its openness,
 -- which is how its own doors slide into the wall. A laser door's frame must
@@ -130,9 +133,11 @@ local ZAP_EVERY = 1.5           -- seconds between two shocks from one door
 local HOLD_RECHECK = 0.5
 
 -- Meals at the door: how often a cell's door looks at its prisoners, how far
--- into the cell it looks, the hunger (0 to 100) at which it calls a guard,
--- how long it waits for one before asking again, and how long after a meal
--- it will not ask at all when hunger cannot be read.
+-- into the cell it looks, the hunger (0 to 100) and the game minutes since a
+-- prisoner's last meal at which it calls a guard, how long it waits for one
+-- before asking again, and how long after a meal it will not ask at all when
+-- hunger cannot be read. UNFED_FOR is the game's own measure of a prisoner
+-- overdue a meal, sixteen hours, which no night between two meals reaches.
 --
 -- A search for prisoners is the dearest thing a door does: the game builds a
 -- full script record of every prisoner it hands back, afresh every time, and
@@ -143,6 +148,7 @@ local MEAL_JOB = "LaserDoorMeal"
 local MEAL_CHECK_EVERY = 30
 local CELL_REACH = 4
 local FOOD_AT = 45
+local UNFED_FOR = 960
 local MEAL_GIVE_UP = 180
 local MEAL_GAP = 480
 
@@ -172,6 +178,8 @@ local mealOut = false
 local mealWait = 0
 local clock = 0
 local lastMeal = -MEAL_GAP
+-- When the door first saw each prisoner who has never eaten, in game minutes.
+local firstSeen = {}
 local pulseTimer = 0
 local settleTimer = 0
 local frame = -1
@@ -357,20 +365,39 @@ local function watchForTrouble(timePassed, raw)
     return true
 end
 
--- The prisoners of this door's cell who are locked in, and whether any of
--- them is hungry enough to call a guard for. A prisoner the game is already
--- feeding is left to the game.
-local function lockedIn()
+-- Game minutes since a prisoner last ate. One who has never eaten is timed
+-- from when this door first saw him.
+local function unfedFor(prisoner, now, seen)
+    local ate = tonumber(prisoner.LastAte)
+    if ate ~= nil and ate > 0 then
+        return now - ate
+    end
+    local id = prisoner.Id ~= nil and tonumber(prisoner.Id.i) or nil
+    if id == nil then
+        return 0
+    end
+    seen[id] = firstSeen[id] or now
+    return now - seen[id]
+end
+
+-- The prisoners of this door's cell a bangup has kept from a meal, and
+-- whether any of them is hungry enough to call a guard for. A prisoner who is
+-- locked in is on a punishment and is the game's to feed, as is one the game
+-- is already feeding.
+local function bangedUp()
     local cell = this.CellId
     local cellId = cell ~= nil and tonumber(cell.i) or nil
     if cellId == nil or cellId < 0 then
         return nil, false
     end
-    local list, hungry = {}, false
+    local now = tonumber(World.TimeIndex) or 0
+    local list, hungry, seen = {}, false, {}
     for prisoner, _ in pairs(nearby("Prisoner", CELL_REACH)) do
         local home = prisoner.Cell
-        if home ~= nil and tonumber(home.i) == cellId and prisoner.Locked == true
-            and (tonumber(prisoner.FeedJobId) or -1) < 0 then
+        if home ~= nil and tonumber(home.i) == cellId and prisoner.Locked ~= true
+            and (tonumber(prisoner.Damage) or 0) < 1
+            and (tonumber(prisoner.FeedJobId) or -1) < 0
+            and unfedFor(prisoner, now, seen) >= UNFED_FOR then
             list[#list + 1] = prisoner
             local food = tonumber(Object.GetProperty(prisoner, "Needs.Food"))
             if food ~= nil then
@@ -380,6 +407,7 @@ local function lockedIn()
             end
         end
     end
+    firstSeen = seen
     return list, hungry
 end
 
@@ -393,7 +421,7 @@ local function watchMeals(timePassed)
         end
         return
     end
-    local list, hungry = lockedIn()
+    local list, hungry = bangedUp()
     if list ~= nil and hungry then
         this.CreateJob(MEAL_JOB)
         mealOut = true
@@ -405,9 +433,11 @@ end
 function JobComplete_LaserDoorMeal()
     mealOut = false
     lastMeal = clock
-    local list = lockedIn()
+    local list = bangedUp()
+    local now = tonumber(World.TimeIndex) or 0
     for _, prisoner in ipairs(list or {}) do
         Object.SetProperty(prisoner, "Needs.Food", 0)
+        Object.SetProperty(prisoner, "LastAte", now)
     end
 end
 

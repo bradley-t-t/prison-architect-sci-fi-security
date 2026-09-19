@@ -16,12 +16,14 @@ A Prison Architect mod. It adds laser fences and laser doors.
   the box brings one in underneath itself and covers it: the servo does the
   work and the box is what you see. A box that is dismantled uncovers its
   servo, which is dismantled like any other.
-- Meals at the door. A prisoner locked in a cell behind a Laser Door, on
-  lockdown or in solitary, is fed through it: the door calls a guard, the
+- Meals at the door during a bangup. The game brings no meals to a cell
+  during a bangup, so a Laser Door on a cell does: it calls a guard, the
   guard stands at the door for a few seconds, and the prisoner is fed
-  without the guard going inside. The game does this only for its own
-  Solitary Door, so the laser door does it itself, and asks early enough
-  that the game's own feeding job, the one that walks in, is never raised.
+  without the guard going inside. A mod cannot read the bangup itself, so
+  the door goes by a prisoner at home in his cell, on no punishment, who
+  last ate sixteen game hours ago or more, which no night between two meals
+  reaches. A prisoner on lockdown or in solitary is left to the game, whose
+  guard feeds him as he would behind any door.
 - The AI Laser Controller. Build one anywhere in the prison and every Laser
   Door becomes automatic, with no guard needed: a door opens for staff and
   for prisoners going about their day and shuts behind them. The game only
