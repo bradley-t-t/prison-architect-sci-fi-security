@@ -115,7 +115,8 @@ OPEN_FRAME_UP = 7
 # Frame 8 is the frame at rest with its beams off.
 REST_FRAME = 8
 DOORS = [
-    # name, colour, width in tiles, price, top row of the door's band on sprites.png
+    # name, colour, width in tiles, price, and a column no longer read: where a
+    # frame sits on sprites.png is worked out by pack_sheet()
     ("LaserDoorRed", "Red", 1, 600, 0),
     ("LaserDoorBlue", "Blue", 1, 600, 6),
     ("LaserDoorLargeRed", "Red", 2, 900, 12),
@@ -160,7 +161,6 @@ STAFF_REACH = {1: 1.5, 2: 2.0}
 # either side, so they are three door widths wide, centred on the door. The
 # vertical-only open frames show nothing flat; their width sets the height
 # of their vertical versions, a door plus one slide, hanging up or down.
-PANEL_BAND = 36
 PANEL_STRIDE = 8
 # The AI Laser Controller sits in the panel's band, past the panel's frames.
 # It never rotates, so each frame is one picture two cells wide.
@@ -168,7 +168,6 @@ CONTROLLER_FRAMES = 2
 CONTROLLER_X0 = PANEL_STRIDE * 3
 # The Laser Door Wire Box is one picture, past the controller's frames.
 WIRE_BOX_X0 = CONTROLLER_X0 + 2 * CONTROLLER_FRAMES
-SHEET_CELLS = (156, 38)
 
 
 def door_frame_cells(door, frame):
@@ -186,35 +185,51 @@ def door_frame_stride(door, frame):
     return 2 * door_frame_cells(door, frame) + 4
 
 
-def door_band_rows(door):
-    """Rows of a door's band: its widest frame, since a vertical version is
-    as tall as its flat frame is wide."""
-    return 6 * door[2]
-
-
 def door_frame_top_aligned(frame):
     return frame == OPEN_FRAME_DOWN
 
 
+# Every mod's sprites share one atlas in the game, so the sheet is packed as
+# tightly as the engine allows. A frame needs a block of its own: its two flat
+# facings side by side, then its two vertical ones, which are as tall as the
+# flat frame is wide. Blocks go on shelves, tallest first, across a sheet
+# SHEET_WIDTH cells wide; the panel, controller and wire box share a last
+# shelf two cells high.
+SHEET_WIDTH = 60
+
+
+def pack_sheet():
+    blocks = [((door[0], f), door_frame_stride(door, f), max(2, door_frame_cells(door, f)))
+              for door in DOORS for f in range(DOOR_FRAMES)]
+    blocks.sort(key=lambda b: (-b[2], -b[1]))
+    origins, x, y, shelf = {}, 0, 0, 0
+    for key, w, h in blocks:
+        if x + w > SHEET_WIDTH:
+            x, y, shelf = 0, y + shelf, 0
+        origins[key] = (x, y, h)
+        x += w
+        shelf = max(shelf, h)
+    return origins, y + shelf
+
+
+_ORIGINS, PANEL_BAND = pack_sheet()
+SHEET_CELLS = (SHEET_WIDTH, PANEL_BAND + 2)
+
+
 def door_frame_cell(door, frame):
-    """Cell of a frame's base (east-west) sprite. Frames sit side by side
-    along the door's band. A base sits on the band's last two rows so its
-    vertical versions fit above it, except the top-aligned frame, whose base
-    sits on the band's first two rows with its vertical versions below."""
-    band = door[4]
-    x = sum(door_frame_stride(door, f) for f in range(frame))
+    """Cell of a frame's base (east-west) sprite. A base sits on its block's
+    last two rows so its vertical versions fit above it, except the
+    top-aligned frame, whose base sits on the block's first two rows with its
+    vertical versions below."""
+    x, y, rows = _ORIGINS[(door[0], frame)]
     if door_frame_top_aligned(frame):
-        return x, band
-    return x, band + door_band_rows(door) - 2
+        return x, y
+    return x, y + rows - 2
 
 
 def door_frame_vertical_row(door, frame):
-    """Top row of a frame's vertical versions: level with the base for the
-    top-aligned frame, otherwise ending on the base's last row."""
-    band = door[4]
-    if door_frame_top_aligned(frame):
-        return band
-    return band + door_band_rows(door) - door_frame_cells(door, frame)
+    """Top row of a frame's vertical versions, which fill the block's height."""
+    return _ORIGINS[(door[0], frame)][1]
 
 
 # ---------------------------------------------------------------- grounds
