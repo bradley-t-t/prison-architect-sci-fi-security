@@ -130,6 +130,11 @@ DOORS = [
 # that way in a band w rows tall, with the base sprite on the band's last
 # two rows. A frame's stride along the sheet is therefore 2w + 2h cells.
 #
+# That is RotateType 1, four facings. A laser door looks the same from either
+# side, so it uses RotateType 2, which the game's own tables, benches and
+# windows use: two facings, the flat one and one vertical one at
+# (x + w, y + h - w). Half the pictures, and half the sheet.
+#
 # A sprite taller than its object is not centred the way a wide one is: it
 # hangs upward from the tile (TopAligned false) or downward from it
 # (TopAligned true). The vertical door versions are taller than the door,
@@ -161,7 +166,7 @@ STAFF_REACH = {1: 1.5, 2: 2.0}
 # either side, so they are three door widths wide, centred on the door. The
 # vertical-only open frames show nothing flat; their width sets the height
 # of their vertical versions, a door plus one slide, hanging up or down.
-PANEL_STRIDE = 8
+PANEL_STRIDE = 2                # the panel looks the same whichever way it faces, so a frame is one picture
 # The AI Laser Controller sits in the panel's band, past the panel's frames.
 # It never rotates, so each frame is one picture two cells wide.
 CONTROLLER_FRAMES = 2
@@ -195,8 +200,8 @@ def door_frame_cells(door, frame):
 
 
 def door_frame_stride(door, frame):
-    """Cells a frame takes along the sheet: its four orientations."""
-    return 2 * door_frame_cells(door, frame) + 4
+    """Cells a frame takes along the sheet: its flat and its vertical facing."""
+    return door_frame_cells(door, frame) + 2
 
 
 def door_frame_top_aligned(frame):
@@ -224,7 +229,7 @@ def frame_rects(door, frame):
     w = door_frame_cells(door, frame)
     rows = max(2, w)
     flat_y = 0 if door_frame_top_aligned(frame) else rows - 2
-    return [(0, flat_y, w, 2), (w, flat_y, w, 2), (2 * w, 0, 2, w), (2 * w + 2, 0, 2, w)]
+    return [(0, flat_y, w, 2), (w, 0, 2, w)]
 
 
 def frame_draws(door, frame):
@@ -232,7 +237,7 @@ def frame_draws(door, frame):
     _, colour, tiles, _, _ = door
     flat = door_sprite(COLOURS[colour], tiles, frame).getbbox() is not None
     tall = door_sprite_vertical(COLOURS[colour], tiles, frame).getbbox() is not None
-    return [flat, flat, tall, tall]
+    return [flat, tall]
 
 
 def pack_into(width, items):
@@ -978,7 +983,7 @@ END
         for f in range(DOOR_FRAMES):
             sx, sy = door_frame_cell(door, f)
             aligned = "true" if door_frame_top_aligned(f) else "false"
-            sprites += f"    BEGIN Sprite         x {sx}  y {sy}  w {door_frame_cells(door, f)}  h 2  RotateType 1  TopAligned {aligned}  END\n"
+            sprites += f"    BEGIN Sprite         x {sx}  y {sy}  w {door_frame_cells(door, f)}  h 2  RotateType 2  TopAligned {aligned}  END\n"
         out.append(f"""BEGIN Object
     Name                 {name}
 {width}    ConstructionTime     15.00000
@@ -997,7 +1002,7 @@ END
 {sprites}END
 """)
     panel_sprites = "".join(
-        f"    BEGIN Sprite         x {PANEL_X0 + PANEL_STRIDE * f}  y {PANEL_BAND}  w 2  h 2  RotateType 1  TopAligned false  END\n"
+        f"    BEGIN Sprite         x {PANEL_X0 + PANEL_STRIDE * f}  y {PANEL_BAND}  w 2  h 2  RotateType 0  TopAligned false  END\n"
         for f in range(PANEL_FRAMES))
     out.append(f"""BEGIN Object
     Name                 LaserDoorPanel
@@ -1157,18 +1162,12 @@ def build_sprites():
             top = door_frame_vertical_row(door, f)
             flat = door_sprite(COLOURS[colour], tiles, f)
             tall = door_sprite_vertical(COLOURS[colour], tiles, f)
-            # the door is symmetric, so both facings share one picture
             sheet.paste(flat, (sx * 32, sy * 32))
-            sheet.paste(flat, ((sx + w) * 32, sy * 32))
-            sheet.paste(tall, ((sx + 2 * w) * 32, top * 32))
-            sheet.paste(tall, ((sx + 2 * w + 2) * 32, top * 32))
+            sheet.paste(tall, ((sx + w) * 32, top * 32))
     for f in range(PANEL_FRAMES):
         base = panel_sprite(f)
         x0 = PANEL_X0 + PANEL_STRIDE * f
         sheet.paste(base, (x0 * 32, PANEL_BAND * 32))
-        sheet.paste(base.transpose(Image.ROTATE_180), ((x0 + 2) * 32, PANEL_BAND * 32))
-        sheet.paste(base.transpose(Image.ROTATE_270), ((x0 + 4) * 32, PANEL_BAND * 32))
-        sheet.paste(base.transpose(Image.ROTATE_90), ((x0 + 6) * 32, PANEL_BAND * 32))
     for f in range(CONTROLLER_FRAMES):
         sheet.paste(controller_sprite(f), ((PANEL_X0 + CONTROLLER_X0 + 2 * f) * 32, PANEL_BAND * 32))
     sheet.paste(wire_box_sprite(), ((PANEL_X0 + WIRE_BOX_X0) * 32, PANEL_BAND * 32))
