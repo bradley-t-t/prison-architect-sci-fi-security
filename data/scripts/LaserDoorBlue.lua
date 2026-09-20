@@ -600,11 +600,13 @@ function Update(tick)
         -- The game hands a script every object a search finds as a global
         -- named for the object's type and id, and never takes one back, so a
         -- door would hold on to everyone it has ever seen. Clear them, and
-        -- Lua's own collector frees what they held. The servos and panels
-        -- the door remembers are in locals and stay usable.
+        -- Lua's own collector frees what they held. Reading a property of an
+        -- object goes through its global, so the servos and panels the door
+        -- remembers between looks keep theirs.
         if _G ~= nil then
             for name, value in pairs(_G) do
-                if type(value) == "table" and type(name) == "string" and name:find("i%-?%d+u%-?%d+$") then
+                if type(value) == "table" and type(name) == "string" and name:find("i%-?%d+u%-?%d+$")
+                    and not name:find("^Servo") and not name:find("^LaserDoorPanel") then
                     _G[name] = nil
                 end
             end
