@@ -170,9 +170,23 @@ CONTROLLER_X0 = PANEL_STRIDE * 3
 WIRE_BOX_X0 = CONTROLLER_X0 + 2 * CONTROLLER_FRAMES
 
 
+# The door script holds the engine's slide at zero and shows the rest frame
+# while a door is open. Frames 3 to 7 are what it would show if the slide could
+# not be held: the frame pre-shifted a door's width each way, and an empty one
+# for the ticks in between. Every laser door in a played prison of 214 held its
+# slide at zero and none had ever shown one, and their canvases, three doors
+# wide with a door's worth of picture in them, were four fifths of the sheet.
+# So those five frames now read the rest frame's picture, from the same spot
+# on the sheet, and a door that cannot hold its slide shows its posts a little
+# off the doorway while it is open. The script still counts nine frames.
+ALIASED_FRAMES = (OPEN_FRAME_LEFT, OPEN_FRAME_RIGHT, TRANSITION_FRAME, OPEN_FRAME_DOWN, OPEN_FRAME_UP)
+
+
 def door_frame_cells(door, frame):
     """Width in 32 px cells of a frame's flat sprite."""
     tiles = door[2]
+    if frame in ALIASED_FRAMES:
+        return 2 * tiles
     if frame in (OPEN_FRAME_LEFT, OPEN_FRAME_RIGHT):
         return 6 * tiles
     if frame in (OPEN_FRAME_DOWN, OPEN_FRAME_UP):
@@ -186,7 +200,7 @@ def door_frame_stride(door, frame):
 
 
 def door_frame_top_aligned(frame):
-    return frame == OPEN_FRAME_DOWN
+    return frame == OPEN_FRAME_DOWN and frame not in ALIASED_FRAMES
 
 
 # Every mod's sprites share one atlas in the game, so the sheet is packed as
@@ -250,14 +264,17 @@ def pack_into(width, items):
 
 
 def pack_sheet():
-    items = [((door[0], f), frame_rects(door, f), frame_draws(door, f)) for door in DOORS for f in range(DOOR_FRAMES)]
+    items = [((door[0], f), frame_rects(door, f), frame_draws(door, f))
+             for door in DOORS for f in range(DOOR_FRAMES) if f not in ALIASED_FRAMES]
     items.append(("strip", [(0, 0, PANEL_STRIP_CELLS, 2)], [True]))
     items.sort(key=lambda it: -sum(w * h for (_, _, w, h), solid in zip(it[1], it[2]) if solid))
     best = None
     for width in range(PANEL_STRIP_CELLS + PANEL_STRIP_CELLS % 2, 130, 2):
         packed = pack_into(width, items)
-        if packed and (best is None or width * packed[1] < best[0]):
-            best = (width * packed[1], width, packed)
+        # the squarest sheet that holds everything, then the smallest
+        score = (max(width, packed[1]), width * packed[1]) if packed else None
+        if packed and (best is None or score < best[0]):
+            best = (score, width, packed)
     return best[1], best[2][0], best[2][1]
 
 
@@ -271,6 +288,9 @@ def layout():
     global _ORIGINS, SHEET_CELLS, PANEL_X0, PANEL_BAND
     if _ORIGINS is None:
         width, _ORIGINS, rows = pack_sheet()
+        for door in DOORS:
+            for f in ALIASED_FRAMES:
+                _ORIGINS[(door[0], f)] = _ORIGINS[(door[0], REST_FRAME)]
         SHEET_CELLS = (width, rows)
         PANEL_X0, PANEL_BAND = _ORIGINS["strip"]
     return _ORIGINS
@@ -1130,6 +1150,8 @@ def build_sprites():
     for door in DOORS:
         _, colour, tiles, _, _ = door
         for f in range(DOOR_FRAMES):
+            if f in ALIASED_FRAMES:
+                continue
             sx, sy = door_frame_cell(door, f)
             w = door_frame_cells(door, f)
             top = door_frame_vertical_row(door, f)

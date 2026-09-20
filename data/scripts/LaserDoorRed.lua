@@ -48,14 +48,12 @@
 -- starts opening it, the script snaps it fully open, and the tick it starts
 -- closing, fully shut, so the beams cut out and come back at once.
 --
--- If OpenDir cannot be held at zero the script falls back to the pre-shifted
--- frames. Sprites 3 and 4 hold the beamless frame one slide to the left or
--- right and sprites 6 and 7 one slide down or up; the script shows the one
--- drawn opposite the slide, so the engine's offset carries it back into the
--- doorway. OpenDir is the door's facing turned a quarter turn, times its
--- width, so which one that is depends on how the door was rotated. Sprite 5
--- is empty: it covers the ticks where the door is part-way and the settle
--- time after each change of state, while the renderer catches up.
+-- If OpenDir cannot be held at zero the script asks for frames 3 to 7, which
+-- were once the beamless frame drawn a slide to either side, so the engine's
+-- offset carried it back into the doorway. Every door in a played prison held
+-- its slide at zero and those pictures were most of the mod's sprite sheet, so
+-- all five now show the rest frame: a door that cannot hold its slide shows
+-- its posts a little off the doorway while it is open.
 --
 -- The beams bite back. Any tick the door takes damage, whoever is standing
 -- against it is tazed the way a guard's tazer would drop them, and the door's
