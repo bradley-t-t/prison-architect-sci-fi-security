@@ -597,6 +597,9 @@ function Update(tick)
         local waited = mealTimer
         mealTimer = 0
         watchMeals(waited)
+        -- The door is a Lua state of its own, and what it drops stays in
+        -- memory until a collection runs. The state is small, so it is cheap.
+        if collectgarbage then collectgarbage("collect") end
     end
 
     controlTimer = controlTimer + timePassed
