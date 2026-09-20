@@ -190,30 +190,90 @@ def door_frame_top_aligned(frame):
 
 
 # Every mod's sprites share one atlas in the game, so the sheet is packed as
-# tightly as the engine allows. A frame needs a block of its own: its two flat
-# facings side by side, then its two vertical ones, which are as tall as the
-# flat frame is wide. Blocks go on shelves, tallest first, across a sheet
-# SHEET_WIDTH cells wide; the panel, controller and wire box share a last
-# shelf two cells high.
-SHEET_WIDTH = 60
+# tightly as the engine allows. The engine reads a frame's four facings from
+# fixed spots: two flat ones side by side, then two vertical ones, as tall as
+# the flat frame is wide. That is an L of four rectangles with a hole in its
+# corner, and the next frame's rectangles go in the hole: frames are placed
+# rectangle by rectangle, largest first, at the first spot on the sheet where
+# none of their four touches one already placed. A rectangle that draws
+# nothing (the part-way frame, and the flat facings of the two frames that
+# only ever show vertically) is just as empty wherever it is read from, so
+# empty rectangles may lie over one another, though never over a drawn one.
+# The panel, controller and wire box are a strip two cells high. Both sides of
+# the sheet come out a multiple of 64 px, two cells, which the game's atlas
+# wants.
+PANEL_STRIP_CELLS = PANEL_STRIDE * PANEL_FRAMES + 2 * CONTROLLER_FRAMES + 2
+
+
+def frame_rects(door, frame):
+    """A frame's four rectangles (x, y, w, h) from the corner of its block."""
+    w = door_frame_cells(door, frame)
+    rows = max(2, w)
+    flat_y = 0 if door_frame_top_aligned(frame) else rows - 2
+    return [(0, flat_y, w, 2), (w, flat_y, w, 2), (2 * w, 0, 2, w), (2 * w + 2, 0, 2, w)]
+
+
+def frame_draws(door, frame):
+    """Whether each of a frame's four rectangles has anything drawn in it."""
+    _, colour, tiles, _, _ = door
+    flat = door_sprite(COLOURS[colour], tiles, frame).getbbox() is not None
+    tall = door_sprite_vertical(COLOURS[colour], tiles, frame).getbbox() is not None
+    return [flat, flat, tall, tall]
+
+
+def pack_into(width, items):
+    drawn = [[False] * width for _ in range(400)]
+    blank = [[False] * width for _ in range(400)]
+    origins = {}
+    for key, rects, draws in items:
+        reach = max(x + w for x, _, w, _ in rects)
+        if reach > width:
+            return None
+
+        def fits(ox, oy):
+            for (x, y, w, h), solid in zip(rects, draws):
+                for j in range(oy + y, oy + y + h):
+                    for i in range(ox + x, ox + x + w):
+                        if drawn[j][i] or (solid and blank[j][i]):
+                            return False
+            return True
+
+        spot = next(((ox, oy) for oy in range(0, 380, 2) for ox in range(0, width - reach + 1, 2) if fits(ox, oy)))
+        for (x, y, w, h), solid in zip(rects, draws):
+            grid = drawn if solid else blank
+            for j in range(spot[1] + y, spot[1] + y + h):
+                for i in range(spot[0] + x, spot[0] + x + w):
+                    grid[j][i] = True
+        origins[key] = spot
+    rows = max(j for j in range(400) if any(drawn[j]) or any(blank[j])) + 1
+    return origins, rows + rows % 2
 
 
 def pack_sheet():
-    blocks = [((door[0], f), door_frame_stride(door, f), max(2, door_frame_cells(door, f)))
-              for door in DOORS for f in range(DOOR_FRAMES)]
-    blocks.sort(key=lambda b: (-b[2], -b[1]))
-    origins, x, y, shelf = {}, 0, 0, 0
-    for key, w, h in blocks:
-        if x + w > SHEET_WIDTH:
-            x, y, shelf = 0, y + shelf, 0
-        origins[key] = (x, y, h)
-        x += w
-        shelf = max(shelf, h)
-    return origins, y + shelf
+    items = [((door[0], f), frame_rects(door, f), frame_draws(door, f)) for door in DOORS for f in range(DOOR_FRAMES)]
+    items.append(("strip", [(0, 0, PANEL_STRIP_CELLS, 2)], [True]))
+    items.sort(key=lambda it: -sum(w * h for (_, _, w, h), solid in zip(it[1], it[2]) if solid))
+    best = None
+    for width in range(PANEL_STRIP_CELLS + PANEL_STRIP_CELLS % 2, 130, 2):
+        packed = pack_into(width, items)
+        if packed and (best is None or width * packed[1] < best[0]):
+            best = (width * packed[1], width, packed)
+    return best[1], best[2][0], best[2][1]
 
 
-_ORIGINS, PANEL_BAND = pack_sheet()
-SHEET_CELLS = (SHEET_WIDTH, PANEL_BAND + 2)
+_ORIGINS = None
+SHEET_CELLS = PANEL_X0 = PANEL_BAND = None      # set by layout()
+
+
+def layout():
+    """Packed on first use: the door pictures it measures are drawn by
+    functions further down this file."""
+    global _ORIGINS, SHEET_CELLS, PANEL_X0, PANEL_BAND
+    if _ORIGINS is None:
+        width, _ORIGINS, rows = pack_sheet()
+        SHEET_CELLS = (width, rows)
+        PANEL_X0, PANEL_BAND = _ORIGINS["strip"]
+    return _ORIGINS
 
 
 def door_frame_cell(door, frame):
@@ -221,15 +281,13 @@ def door_frame_cell(door, frame):
     last two rows so its vertical versions fit above it, except the
     top-aligned frame, whose base sits on the block's first two rows with its
     vertical versions below."""
-    x, y, rows = _ORIGINS[(door[0], frame)]
-    if door_frame_top_aligned(frame):
-        return x, y
-    return x, y + rows - 2
+    x, y = layout()[(door[0], frame)]
+    return x, y + frame_rects(door, frame)[0][1]
 
 
 def door_frame_vertical_row(door, frame):
     """Top row of a frame's vertical versions, which fill the block's height."""
-    return _ORIGINS[(door[0], frame)][1]
+    return layout()[(door[0], frame)][1]
 
 
 # ---------------------------------------------------------------- grounds
@@ -919,7 +977,7 @@ END
 {sprites}END
 """)
     panel_sprites = "".join(
-        f"    BEGIN Sprite         x {PANEL_STRIDE * f}  y {PANEL_BAND}  w 2  h 2  RotateType 1  TopAligned false  END\n"
+        f"    BEGIN Sprite         x {PANEL_X0 + PANEL_STRIDE * f}  y {PANEL_BAND}  w 2  h 2  RotateType 1  TopAligned false  END\n"
         for f in range(PANEL_FRAMES))
     out.append(f"""BEGIN Object
     Name                 LaserDoorPanel
@@ -941,7 +999,7 @@ END
 {panel_sprites}END
 """)
     controller_sprites = "".join(
-        f"    BEGIN Sprite         x {CONTROLLER_X0 + 2 * f}  y {PANEL_BAND}  w 2  h 2  RotateType 0  TopAligned false  END\n"
+        f"    BEGIN Sprite         x {PANEL_X0 + CONTROLLER_X0 + 2 * f}  y {PANEL_BAND}  w 2  h 2  RotateType 0  TopAligned false  END\n"
         for f in range(CONTROLLER_FRAMES))
     out.append(f"""BEGIN Object
     Name                 AILaserController
@@ -960,7 +1018,7 @@ END
     Properties           StaticObject
     Properties           Scripted
     NumSprites           {CONTROLLER_FRAMES}
-    BEGIN ToolbarSprite  x {CONTROLLER_X0}  y {PANEL_BAND}  w 2  h 2  END
+    BEGIN ToolbarSprite  x {PANEL_X0 + CONTROLLER_X0}  y {PANEL_BAND}  w 2  h 2  END
 {controller_sprites}END
 """)
     # Like the game's Door Servo it names no group and is blocked by nothing,
@@ -980,8 +1038,8 @@ END
     Properties           Scripted
     Research             RemoteAccess
     NumSprites           1
-    BEGIN ToolbarSprite  x {WIRE_BOX_X0}  y {PANEL_BAND}  w 2  h 2  END
-    BEGIN Sprite         x {WIRE_BOX_X0}  y {PANEL_BAND}  w 2  h 2  RotateType 0  TopAligned false  END
+    BEGIN ToolbarSprite  x {PANEL_X0 + WIRE_BOX_X0}  y {PANEL_BAND}  w 2  h 2  END
+    BEGIN Sprite         x {PANEL_X0 + WIRE_BOX_X0}  y {PANEL_BAND}  w 2  h 2  RotateType 0  TopAligned false  END
 END
 """)
     return "\n".join(out)
@@ -1067,6 +1125,7 @@ def write_text_files(placements, data_dir):
 # ---------------------------------------------------------------- output
 
 def build_sprites():
+    layout()
     sheet = Image.new("RGBA", (SHEET_CELLS[0] * 32, SHEET_CELLS[1] * 32), (0, 0, 0, 0))
     for door in DOORS:
         _, colour, tiles, _, _ = door
@@ -1083,14 +1142,14 @@ def build_sprites():
             sheet.paste(tall, ((sx + 2 * w + 2) * 32, top * 32))
     for f in range(PANEL_FRAMES):
         base = panel_sprite(f)
-        x0 = PANEL_STRIDE * f
+        x0 = PANEL_X0 + PANEL_STRIDE * f
         sheet.paste(base, (x0 * 32, PANEL_BAND * 32))
         sheet.paste(base.transpose(Image.ROTATE_180), ((x0 + 2) * 32, PANEL_BAND * 32))
         sheet.paste(base.transpose(Image.ROTATE_270), ((x0 + 4) * 32, PANEL_BAND * 32))
         sheet.paste(base.transpose(Image.ROTATE_90), ((x0 + 6) * 32, PANEL_BAND * 32))
     for f in range(CONTROLLER_FRAMES):
-        sheet.paste(controller_sprite(f), ((CONTROLLER_X0 + 2 * f) * 32, PANEL_BAND * 32))
-    sheet.paste(wire_box_sprite(), (WIRE_BOX_X0 * 32, PANEL_BAND * 32))
+        sheet.paste(controller_sprite(f), ((PANEL_X0 + CONTROLLER_X0 + 2 * f) * 32, PANEL_BAND * 32))
+    sheet.paste(wire_box_sprite(), ((PANEL_X0 + WIRE_BOX_X0) * 32, PANEL_BAND * 32))
     return sheet
 
 
@@ -1160,6 +1219,7 @@ def main():
         print(__doc__)
         sys.exit(1)
     os.makedirs(DATA, exist_ok=True)
+    layout()
     ts, placements = build_tileset(sys.argv[1])
     ts.save(os.path.join(DATA, "tilesetpadded.png"), optimize=True)
     write_text_files(placements, DATA)

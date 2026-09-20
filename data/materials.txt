@@ -445,15 +445,15 @@ BEGIN Object
     Properties           Door
     Properties           Scripted
     NumSprites           9
-    BEGIN Sprite         x 24  y 54  w 2  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 32  y 54  w 2  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 40  y 54  w 2  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 20  y 36  w 6  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 36  y 36  w 6  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 48  y 54  w 2  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 32  y 40  w 4  h 2  RotateType 1  TopAligned true  END
-    BEGIN Sprite         x 44  y 42  w 4  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 0  y 58  w 2  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 0  y 2  w 2  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 12  y 2  w 2  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 0  y 6  w 2  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 16  y 8  w 6  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 0  y 30  w 6  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 24  y 2  w 2  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 24  y 26  w 4  h 2  RotateType 1  TopAligned true  END
+    BEGIN Sprite         x 24  y 32  w 4  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 20  y 18  w 2  h 2  RotateType 1  TopAligned false  END
 END
 
 BEGIN Object
@@ -471,15 +471,15 @@ BEGIN Object
     Properties           Door
     Properties           Scripted
     NumSprites           9
-    BEGIN Sprite         x 8  y 58  w 2  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 16  y 58  w 2  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 24  y 58  w 2  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 0  y 44  w 6  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 16  y 44  w 6  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 32  y 58  w 2  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 0  y 46  w 4  h 2  RotateType 1  TopAligned true  END
-    BEGIN Sprite         x 12  y 48  w 4  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 40  y 58  w 2  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 0  y 20  w 2  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 24  y 22  w 2  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 20  y 28  w 2  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 0  y 32  w 6  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 0  y 34  w 6  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 24  y 2  w 2  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 24  y 34  w 4  h 2  RotateType 1  TopAligned true  END
+    BEGIN Sprite         x 16  y 38  w 4  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 24  y 30  w 2  h 2  RotateType 1  TopAligned false  END
 END
 
 BEGIN Object
@@ -498,15 +498,15 @@ BEGIN Object
     Properties           Door
     Properties           Scripted
     NumSprites           9
-    BEGIN Sprite         x 24  y 48  w 4  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 36  y 48  w 4  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 48  y 48  w 4  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 0  y 10  w 12  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 28  y 10  w 12  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 0  y 52  w 4  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 0  y 24  w 8  h 2  RotateType 1  TopAligned true  END
-    BEGIN Sprite         x 20  y 30  w 8  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 12  y 52  w 4  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 0  y 4  w 4  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 12  y 4  w 4  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 16  y 6  w 4  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 6  y 10  w 12  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 6  y 12  w 12  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 24  y 2  w 4  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 0  y 18  w 8  h 2  RotateType 1  TopAligned true  END
+    BEGIN Sprite         x 4  y 26  w 8  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 0  y 8  w 4  h 2  RotateType 1  TopAligned false  END
 END
 
 BEGIN Object
@@ -525,15 +525,15 @@ BEGIN Object
     Properties           Door
     Properties           Scripted
     NumSprites           9
-    BEGIN Sprite         x 24  y 52  w 4  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 36  y 52  w 4  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 48  y 52  w 4  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 0  y 22  w 12  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 28  y 22  w 12  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 0  y 56  w 4  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 40  y 24  w 8  h 2  RotateType 1  TopAligned true  END
-    BEGIN Sprite         x 0  y 38  w 8  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 12  y 56  w 4  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 24  y 20  w 4  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 0  y 22  w 4  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 4  y 24  w 4  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 6  y 14  w 12  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 6  y 16  w 12  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 24  y 2  w 4  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 0  y 28  w 8  h 2  RotateType 1  TopAligned true  END
+    BEGIN Sprite         x 4  y 36  w 8  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 24  y 24  w 4  h 2  RotateType 1  TopAligned false  END
 END
 
 BEGIN Object
@@ -553,9 +553,9 @@ BEGIN Object
     Properties           StaticObject
     Properties           Scripted
     NumSprites           3
-    BEGIN Sprite         x 0  y 60  w 2  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 8  y 60  w 2  h 2  RotateType 1  TopAligned false  END
-    BEGIN Sprite         x 16  y 60  w 2  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 0  y 0  w 2  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 8  y 0  w 2  h 2  RotateType 1  TopAligned false  END
+    BEGIN Sprite         x 16  y 0  w 2  h 2  RotateType 1  TopAligned false  END
 END
 
 BEGIN Object
@@ -575,9 +575,9 @@ BEGIN Object
     Properties           StaticObject
     Properties           Scripted
     NumSprites           2
-    BEGIN ToolbarSprite  x 24  y 60  w 2  h 2  END
-    BEGIN Sprite         x 24  y 60  w 2  h 2  RotateType 0  TopAligned false  END
-    BEGIN Sprite         x 26  y 60  w 2  h 2  RotateType 0  TopAligned false  END
+    BEGIN ToolbarSprite  x 24  y 0  w 2  h 2  END
+    BEGIN Sprite         x 24  y 0  w 2  h 2  RotateType 0  TopAligned false  END
+    BEGIN Sprite         x 26  y 0  w 2  h 2  RotateType 0  TopAligned false  END
 END
 
 BEGIN Object
@@ -595,6 +595,6 @@ BEGIN Object
     Properties           Scripted
     Research             RemoteAccess
     NumSprites           1
-    BEGIN ToolbarSprite  x 28  y 60  w 2  h 2  END
-    BEGIN Sprite         x 28  y 60  w 2  h 2  RotateType 0  TopAligned false  END
+    BEGIN ToolbarSprite  x 28  y 0  w 2  h 2  END
+    BEGIN Sprite         x 28  y 0  w 2  h 2  RotateType 0  TopAligned false  END
 END
