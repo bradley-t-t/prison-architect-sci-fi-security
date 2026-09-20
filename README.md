@@ -49,12 +49,12 @@ game's mod folder, then enable it under Extras, Mods.
 | :--- | :--- |
 | `manifest.txt` | The name, description and version the mod screen shows |
 | `data/materials.txt` | The fence materials, the doors, the Laser Door Panel, the AI Laser Controller and the Laser Door Wire Box |
-| `data/tilesetpadded.png` | The game's tileset with the fence tiles added |
+| `data/tilesetpadded.png` | The game's tileset with the fence tiles added, then re-materialled by Sci-Fi Objects' `tools/gen_tiles.py` so both mods ship one file |
 | `data/sprites.png` | The door, panel and controller sprites |
 | `data/scripts/` | One Lua script per door, the panel and the controller |
 | `data/prefabs.txt` | The Quick Build prefabs |
 | `data/jobs.txt` | The door's own job: a guard passing a meal through it |
 | `data/language/base-language.txt` | The names and tooltips the game shows |
-| `tools/gen_assets.py` | Builds `data/` from scratch: the tileset, the sprite sheet, `materials.txt`, the prefabs and the door scripts |
+| `tools/gen_assets.py` | Builds `data/` from scratch: the tileset, the sprite sheet, `materials.txt`, the prefabs and the door scripts. It writes the tileset fresh, so run Sci-Fi Objects' `gen_tiles.py` over it afterwards |
 | `tools/LaserDoor.lua` | The door script every door's copy is generated from |
 | `tools/install.py` | Copies the mod into the game's mod folder |
