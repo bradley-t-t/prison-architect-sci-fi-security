@@ -30,7 +30,7 @@
 --
 -- A script cannot read whether a bangup is on. What it can read is what a
 -- bangup does and no hour of a regime does: a prisoner at home, on no
--- punishment, hungry, who last ate longer ago than a night lasts. Twice a
+-- punishment, hungry, who last ate longer ago than a night lasts. Once a
 -- minute the door looks at the prisoners of its cell, and for one like that
 -- it raises a job of its own, LaserDoorMeal, which a guard works standing at
 -- the door. When that job is done the door feeds every such prisoner of the
@@ -148,10 +148,10 @@ local HOLD_RECHECK = 0.5
 -- A search for prisoners is the dearest thing a door does: the game builds a
 -- full script record of every prisoner it hands back, afresh every time, and
 -- measured in a prison of a hundred cells those searches were half of all the
--- time the game spent. So a door looks into its cell twice a minute, and only
+-- time the game spent. So a door looks into its cell once a minute, and only
 -- as far as a cell is deep.
 local MEAL_JOB = "LaserDoorMeal"
-local MEAL_CHECK_EVERY = 30
+local MEAL_CHECK_EVERY = 60
 local CELL_REACH = 4
 local FOOD_AT = 45
 local UNFED_FOR = 960
@@ -597,9 +597,18 @@ function Update(tick)
         local waited = mealTimer
         mealTimer = 0
         watchMeals(waited)
-        -- The door is a Lua state of its own, and what it drops stays in
-        -- memory until a collection runs. The state is small, so it is cheap.
-        if collectgarbage then collectgarbage("collect") end
+        -- The game hands a script every object a search finds as a global
+        -- named for the object's type and id, and never takes one back, so a
+        -- door would hold on to everyone it has ever seen. Clear them, and
+        -- Lua's own collector frees what they held. The servos and panels
+        -- the door remembers are in locals and stay usable.
+        if _G ~= nil then
+            for name, value in pairs(_G) do
+                if type(value) == "table" and type(name) == "string" and name:find("i%-?%d+u%-?%d+$") then
+                    _G[name] = nil
+                end
+            end
+        end
     end
 
     controlTimer = controlTimer + timePassed
