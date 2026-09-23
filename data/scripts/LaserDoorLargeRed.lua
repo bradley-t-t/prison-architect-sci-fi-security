@@ -8,7 +8,9 @@
 -- whoever carries keys, so a cook or a workman waits at it for a guard. The
 -- script looks for staff standing at the door a few times a second and holds
 -- it open while one is there. It looks for staff and never for prisoners, so
--- a prisoner standing at the door opens nothing.
+-- a prisoner standing at the door opens nothing. An automatic door that is
+-- not sealed is unlocked, and the game opens it for staff itself, so it does
+-- not look for them.
 --
 -- An AI Laser Controller anywhere on the map makes the door automatic. The
 -- script then asks the game to unlock it, and the game opens and shuts it
@@ -574,7 +576,9 @@ function Update(tick)
     end
     if staffTimer >= STAFF_EVERY then
         staffTimer = 0
-        if staffAtDoor() then
+        -- Those looks are most of what a door costs, and an unlocked door
+        -- has no use for them.
+        if (not controlled or lockout > 0) and staffAtDoor() then
             staffHold = STAFF_HOLD
             -- someone is here and the door is held: the next look can wait
             staffTimer = STAFF_EVERY - STAFF_RELOOK
