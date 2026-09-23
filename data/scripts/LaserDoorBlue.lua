@@ -77,6 +77,9 @@
 --   The controller is looked for once every CONTROL_FIND_EVERY seconds, and
 --   prisoners are looked at only while the door is opening or open, which
 --   for nearly every door is nearly never.
+--   The looks for staff and for a controller are made once for every door
+--   by the mod's world script, which writes what it saw on each door, and a
+--   door makes them itself only while that script is not running.
 --   Each door starts its timers at a random point, so hundreds of doors
 --   built together do not all look around on the same tick.
 
@@ -201,6 +204,22 @@ local zapWait = 0
 local held = false
 local holdTimer = 0
 
+-- The mod's world script (data/world.lua) makes the staff and controller looks
+-- for every door at once and writes what it saw on the door. The door reads
+-- that for as long as the script is seen to be running, and makes its own
+-- looks again when it is not: straight after it is built or a save is
+-- loaded, and for good if the world script ever stops.
+local ANCHOR = "LaserDoorUnit"   -- the name the world script searches from
+local WORLD_TIMEOUT = 15         -- seconds without a pass before the door looks for itself
+local WORLD_READ_EVERY = 1       -- seconds between reads of the world script's pass and controller
+local worldSeen = nil            -- the pass number last read off the door
+local worldAge = WORLD_TIMEOUT   -- seconds since it last changed; starts as not running
+local worldTimer = math.random() * WORLD_READ_EVERY
+local worldRead = false          -- whether the pass number has been read yet
+local stampSeen = nil            -- the staff stamp last read off the door
+local stampRead = false
+local named = false
+
 local function showFrame(n)
     if frame ~= n then
         frame = n
@@ -323,15 +342,62 @@ local function showTooltip()
     end
 end
 
-local function lookForController()
-    local found = next(nearby(CONTROLLER, CONTROL_REACH)) ~= nil
-    controlAfter = CONTROL_FIND_EVERY * (0.75 + 0.5 * math.random())
+local function worldRunning()
+    return worldAge < WORLD_TIMEOUT
+end
+
+local function setControlled(found)
     if found ~= controlled then
         controlled = found
         lockout = 0
         this.Locked = not controlled
         showTooltip()
     end
+end
+
+local function lookForController()
+    controlAfter = CONTROL_FIND_EVERY * (0.75 + 0.5 * math.random())
+    if worldRunning() then
+        return    -- the world script's word is read every second instead
+    end
+    setControlled(next(nearby(CONTROLLER, CONTROL_REACH)) ~= nil)
+end
+
+-- Reads what the world script last wrote on the door: its pass number, which
+-- says it is running, and whether a controller stands on the map. The first
+-- pass number read may be one a save kept, so it only sets the mark.
+local function readWorld(timePassed)
+    worldAge = worldAge + timePassed
+    worldTimer = worldTimer + timePassed
+    if worldTimer < WORLD_READ_EVERY then
+        return
+    end
+    worldTimer = 0
+    if not named then
+        -- a door from a save made before the world script names itself here
+        if this.Name ~= ANCHOR then
+            this.Name = ANCHOR
+        end
+        named = true
+    end
+    local pass = this.LaserWorld
+    if worldRead and pass ~= worldSeen then
+        worldAge = 0
+    end
+    worldSeen, worldRead = pass, true
+    if worldRunning() then
+        setControlled(tonumber(this.LaserAuto) == 1)
+    end
+end
+
+-- Whether the world script has seen staff at the door since the last look.
+-- The stamp read on the first look may be one a save kept, so it only sets
+-- the mark.
+local function stampedByWorld()
+    local stamp = this.LaserStaff
+    local fresh = stampRead and stamp ~= stampSeen
+    stampSeen, stampRead = stamp, true
+    return fresh
 end
 
 -- The game keeps a prisoner's misbehaviour as a name or a number, and
@@ -574,11 +640,20 @@ function Update(tick)
     if staffHold > 0 then
         staffHold = staffHold - timePassed
     end
+    readWorld(timePassed)
     if staffTimer >= STAFF_EVERY then
         staffTimer = 0
-        -- Those looks are most of what a door costs, and an unlocked door
-        -- has no use for them.
-        if (not controlled or lockout > 0) and staffAtDoor() then
+        -- Those looks are most of what a door costs, so the world script's
+        -- are read whenever it is running, and an unlocked door has no use
+        -- for either.
+        local staffHere
+        if worldRunning() then
+            staffHere = stampedByWorld()
+        else
+            stampSeen, stampRead = nil, false
+            staffHere = (not controlled or lockout > 0) and staffAtDoor()
+        end
+        if staffHere and (not controlled or lockout > 0) then
             staffHold = STAFF_HOLD
             -- someone is here and the door is held: the next look can wait
             staffTimer = STAFF_EVERY - STAFF_RELOOK

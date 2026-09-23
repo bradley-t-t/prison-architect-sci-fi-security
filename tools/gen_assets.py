@@ -7,6 +7,7 @@ Outputs, relative to the mod root (the parent of this tools/ folder):
                                doors and the panel
   data/language/base-language.txt   names and build-menu text
   data/scripts/LaserDoor*.lua  one copy of the door script per door object
+  data/world.lua               the looks every door shares, made once
   data/jobs.txt                the door's own job, a guard passing a meal through it
   data/prefabs.txt             the Laser Cell Block quick build
   data/sprites.png             door and panel sprites
@@ -1145,6 +1146,7 @@ def write_text_files(placements, data_dir):
                     os.path.join(data_dir, "scripts", "AILaserController.lua"))
     shutil.copyfile(os.path.join(TOOLS, "LaserDoorWireBox.lua"),
                     os.path.join(data_dir, "scripts", "LaserDoorWireBox.lua"))
+    shutil.copyfile(os.path.join(TOOLS, "world.lua"), os.path.join(data_dir, "world.lua"))
 
 
 # ---------------------------------------------------------------- output
