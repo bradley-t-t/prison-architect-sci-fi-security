@@ -19,6 +19,11 @@
 --               seen it change for a while does its own looks again, as it
 --               always did, so nothing depends on this script working.
 --
+-- One search for a kind of staff hands back every member of that kind on the
+-- map, which costs more than a few doors' own looks put together. So the
+-- script only takes the looks over once the prison holds TAKE_OVER_AT doors,
+-- and below that it writes nothing and every door looks for itself.
+--
 -- A world script has no object of its own to search from, so every door
 -- names itself ANCHOR and a search is made from whichever door the game
 -- hands back for that name. The whole map is in reach of any of them.
@@ -31,6 +36,7 @@ local ANCHOR = "LaserDoorUnit"
 local DOOR_REACH = { LaserDoorRed = 1.5, LaserDoorBlue = 1.5, LaserDoorLargeRed = 2.0, LaserDoorLargeBlue = 2.0 }
 local CONTROLLER = "AILaserController"
 local WHOLE_MAP = 5000
+local TAKE_OVER_AT = 40   -- doors on the map before this script makes their looks
 
 -- The same kinds, in the same turns, the doors looked for: the kinds a door is
 -- likeliest to meet, with one of the kinds it seldom meets every RARE_EVERY
@@ -54,6 +60,7 @@ local commonAt = 0
 local rareAt = 0
 local hot = {}            -- kind -> true when seen at a door on the last round
 local controlled = false
+local active = false      -- whether there are doors enough for this script to look for them
 
 -- Every door, by the tile it stands on, and each with its reach. Doors never
 -- move, so they are gathered once a pass and kept in between.
@@ -66,6 +73,7 @@ end
 local function gatherDoors(anchor)
     passes = passes + 1
     byTile = {}
+    local doors = {}
     for kind, reach in pairs(DOOR_REACH) do
         for door in pairs(Find(anchor, kind, WHOLE_MAP) or {}) do
             local pos = door.Pos
@@ -77,11 +85,20 @@ local function gatherDoors(anchor)
                     list = {}
                     byTile[key] = list
                 end
-                list[#list + 1] = { door = door, x = x, y = y, reach = reach }
-                safe(Set, door, "LaserAuto", controlled and 1 or 0)
-                safe(Set, door, "LaserWorld", passes)
+                local entry = { door = door, x = x, y = y, reach = reach }
+                list[#list + 1] = entry
+                doors[#doors + 1] = entry
             end
         end
+    end
+    active = #doors >= TAKE_OVER_AT
+    if not active then
+        byTile = {}
+        return
+    end
+    for _, entry in ipairs(doors) do
+        safe(Set, entry.door, "LaserAuto", controlled and 1 or 0)
+        safe(Set, entry.door, "LaserWorld", passes)
     end
 end
 
@@ -167,7 +184,9 @@ function Update(timePassed)
         doorsTimer = 0
         gatherDoors(anchor)
     end
-    staffRound(anchor)
+    if active then
+        staffRound(anchor)
+    end
 end
 
 -- The game hands a script every object a search finds as a global named for
